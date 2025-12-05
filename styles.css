@@ -1,0 +1,760 @@
+/* Material Design 3 - Farm Map */
+
+:root {
+    /* MD3 Color Tokens - Light Theme */
+    --md-sys-color-primary: #2e7d32;
+    --md-sys-color-on-primary: #ffffff;
+    --md-sys-color-primary-container: #a5d6a7;
+    --md-sys-color-on-primary-container: #1b5e20;
+    
+    --md-sys-color-secondary: #5d7f5e;
+    --md-sys-color-on-secondary: #ffffff;
+    --md-sys-color-secondary-container: #e0f2e1;
+    --md-sys-color-on-secondary-container: #1a3a1c;
+    
+    --md-sys-color-surface: #fef7ff;
+    --md-sys-color-surface-variant: #e7e0ec;
+    --md-sys-color-on-surface: #1d1b20;
+    --md-sys-color-on-surface-variant: #49454f;
+    
+    --md-sys-color-background: #fffbfe;
+    --md-sys-color-on-background: #1d1b20;
+    
+    --md-sys-color-error: #ba1a1a;
+    --md-sys-color-on-error: #ffffff;
+    
+    --md-sys-color-outline: #79747e;
+    --md-sys-color-outline-variant: #cac4d0;
+    
+    /* Elevation */
+    --md-sys-elevation-1: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+    --md-sys-elevation-2: 0 1px 2px rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15);
+    --md-sys-elevation-3: 0 4px 8px 3px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.3);
+    
+    /* Shape */
+    --md-sys-shape-corner-extra-small: 4px;
+    --md-sys-shape-corner-small: 8px;
+    --md-sys-shape-corner-medium: 12px;
+    --md-sys-shape-corner-large: 16px;
+    --md-sys-shape-corner-extra-large: 28px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--md-sys-color-background);
+    color: var(--md-sys-color-on-background);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* Header */
+header {
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    padding: 16px 24px;
+    box-shadow: var(--md-sys-elevation-2);
+    z-index: 100;
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.header-icon {
+    font-size: 32px;
+}
+
+header h1 {
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: 0;
+}
+
+.header-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* Material Design 3 Buttons */
+.md-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border: none;
+    border-radius: var(--md-sys-shape-corner-extra-large);
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.1px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.md-button .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.md-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: currentColor;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.md-button:hover::before {
+    opacity: 0.08;
+}
+
+.md-button:active::before {
+    opacity: 0.12;
+}
+
+.md-filled-button {
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    box-shadow: var(--md-sys-elevation-1);
+}
+
+.md-filled-button:hover {
+    box-shadow: var(--md-sys-elevation-2);
+}
+
+.md-outlined-button {
+    background: transparent;
+    color: var(--md-sys-color-on-primary);
+    border: 1px solid currentColor;
+}
+
+.full-width {
+    width: 100%;
+    justify-content: center;
+}
+
+/* Map */
+#map {
+    flex: 1;
+    width: 100%;
+    position: relative;
+    margin-bottom: 60px; /* Отступ для баннера */
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    overflow: auto;
+    animation: fadeIn 0.2s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    background: var(--md-sys-color-surface);
+    margin: 40px auto;
+    border-radius: var(--md-sys-shape-corner-extra-large);
+    width: 90%;
+    max-width: 500px;
+    box-shadow: var(--md-sys-elevation-3);
+    animation: slideUp 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.modal-content.large {
+    max-width: 600px;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 16px;
+}
+
+.modal-header h2 {
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--md-sys-color-on-surface);
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--md-sys-color-on-surface-variant);
+    transition: background 0.2s;
+}
+
+.close-btn:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.close-btn .material-symbols-outlined {
+    font-size: 24px;
+}
+
+.modal-body {
+    padding: 0 24px 24px;
+}
+
+/* Material Design 3 Text Fields */
+.md-text-field {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.md-text-field input,
+.md-text-field textarea {
+    width: 100%;
+    padding: 16px 16px 8px;
+    border: 1px solid var(--md-sys-color-outline);
+    border-radius: var(--md-sys-shape-corner-extra-small);
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    color: var(--md-sys-color-on-surface);
+    background: transparent;
+    transition: all 0.2s;
+    outline: none;
+}
+
+.md-text-field textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.md-text-field input:focus,
+.md-text-field textarea:focus {
+    border-color: var(--md-sys-color-primary);
+    border-width: 2px;
+    padding: 15px 15px 7px;
+}
+
+.md-text-field label {
+    position: absolute;
+    left: 16px;
+    top: 16px;
+    font-size: 16px;
+    color: var(--md-sys-color-on-surface-variant);
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+    background: var(--md-sys-color-surface);
+    padding: 0 4px;
+}
+
+.md-text-field input:focus + label,
+.md-text-field input:not(:placeholder-shown) + label,
+.md-text-field textarea:focus + label,
+.md-text-field textarea:not(:placeholder-shown) + label {
+    top: -8px;
+    left: 12px;
+    font-size: 12px;
+    color: var(--md-sys-color-primary);
+}
+
+/* Select */
+.md-select {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.md-select select {
+    width: 100%;
+    padding: 16px 16px 8px;
+    border: 1px solid var(--md-sys-color-outline);
+    border-radius: var(--md-sys-shape-corner-extra-small);
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    color: var(--md-sys-color-on-surface);
+    background: var(--md-sys-color-surface);
+    cursor: pointer;
+    outline: none;
+}
+
+.md-select select:focus {
+    border-color: var(--md-sys-color-primary);
+    border-width: 2px;
+}
+
+.md-select label {
+    position: absolute;
+    left: 12px;
+    top: -8px;
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+    background: var(--md-sys-color-surface);
+    padding: 0 4px;
+}
+
+/* Rating */
+.rating-section {
+    margin-bottom: 24px;
+}
+
+.rating-label {
+    display: block;
+    font-size: 14px;
+    color: var(--md-sys-color-on-surface-variant);
+    margin-bottom: 12px;
+}
+
+.md-rating {
+    display: flex;
+    gap: 4px;
+}
+
+.star-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.2s;
+    color: var(--md-sys-color-outline);
+}
+
+.star-btn:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.star-btn.active {
+    color: #ffc107;
+}
+
+.star-btn .material-symbols-outlined {
+    font-size: 32px;
+    font-variation-settings: 'FILL' 0;
+}
+
+.star-btn.active .material-symbols-outlined {
+    font-variation-settings: 'FILL' 1;
+}
+
+/* Form Row */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+/* Success Card */
+.md-card {
+    background: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    padding: 24px;
+    border-radius: var(--md-sys-shape-corner-large);
+    margin-top: 24px;
+    text-align: center;
+}
+
+.success-icon {
+    font-size: 48px;
+    color: var(--md-sys-color-primary);
+    margin-bottom: 16px;
+}
+
+.success-card h3 {
+    font-size: 22px;
+    font-weight: 500;
+    margin-bottom: 16px;
+}
+
+.code-display {
+    font-size: 24px;
+    font-weight: 700;
+    font-family: 'Roboto Mono', monospace;
+    color: var(--md-sys-color-primary);
+    margin: 16px 0;
+    padding: 16px;
+    background: var(--md-sys-color-surface);
+    border-radius: var(--md-sys-shape-corner-medium);
+    letter-spacing: 2px;
+}
+
+.code-info {
+    font-size: 14px;
+    color: var(--md-sys-color-on-primary-container);
+    opacity: 0.8;
+}
+
+/* Farm Info */
+#farmInfo h2 {
+    font-size: 32px;
+    font-weight: 400;
+    color: var(--md-sys-color-on-surface);
+    margin-bottom: 16px;
+}
+
+#farmInfo p {
+    margin: 8px 0;
+    font-size: 16px;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+#farmInfo strong {
+    color: var(--md-sys-color-on-surface);
+}
+
+.rating-display {
+    font-size: 24px;
+    color: #ffc107;
+    margin: 12px 0;
+}
+
+.operators {
+    margin: 16px 0;
+}
+
+.operator-tag {
+    display: inline-flex;
+    align-items: center;
+    background: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-on-secondary-container);
+    padding: 6px 16px;
+    border-radius: var(--md-sys-shape-corner-small);
+    margin: 4px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.comments {
+    margin-top: 24px;
+}
+
+.comments h3 {
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+    margin-bottom: 16px;
+}
+
+.comment {
+    background: var(--md-sys-color-surface-variant);
+    padding: 16px;
+    border-radius: var(--md-sys-shape-corner-medium);
+    margin: 12px 0;
+}
+
+.comment-rating {
+    color: #ffc107;
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+.comment p {
+    color: var(--md-sys-color-on-surface);
+    line-height: 1.5;
+}
+
+/* Promo Comment - White Tax Returns */
+.promo-comment {
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    border: 2px solid var(--md-sys-color-primary);
+    padding: 20px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.promo-comment::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.promo-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.promo-icon {
+    font-size: 32px;
+    color: var(--md-sys-color-primary);
+    font-variation-settings: 'FILL' 1;
+}
+
+.promo-header strong {
+    font-size: 18px;
+    color: var(--md-sys-color-primary);
+}
+
+.promo-comment p {
+    margin: 8px 0;
+    color: var(--md-sys-color-on-surface);
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.promo-comment strong {
+    color: var(--md-sys-color-primary);
+    font-weight: 600;
+}
+
+.promo-comment a {
+    color: var(--md-sys-color-primary);
+    text-decoration: none;
+    font-weight: 600;
+    border-bottom: 2px solid var(--md-sys-color-primary);
+    transition: all 0.2s;
+}
+
+.promo-comment a:hover {
+    background: var(--md-sys-color-primary);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Promo Banner - White Tax Returns */
+.promo-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, #1b5e20 100%);
+    color: white;
+    padding: 12px 16px;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.2);
+    z-index: 500;
+    animation: slideInUp 0.5s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+.promo-banner-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.promo-banner .material-symbols-outlined {
+    font-size: 32px;
+    font-variation-settings: 'FILL' 1;
+}
+
+.promo-text {
+    flex: 1;
+    min-width: 200px;
+}
+
+.promo-text strong {
+    font-size: 16px;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.promo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    color: var(--md-sys-color-primary);
+    padding: 10px 20px;
+    border-radius: var(--md-sys-shape-corner-extra-large);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s;
+    box-shadow: var(--md-sys-elevation-1);
+}
+
+.promo-link:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--md-sys-elevation-2);
+}
+
+.promo-link .material-symbols-outlined {
+    font-size: 20px;
+}
+
+/* Leaflet Popup Customization */
+.leaflet-popup-content-wrapper {
+    border-radius: var(--md-sys-shape-corner-medium);
+    box-shadow: var(--md-sys-elevation-2);
+}
+
+.leaflet-popup-content {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    header {
+        padding: 12px 16px;
+    }
+    
+    .header-title {
+        margin-bottom: 12px;
+    }
+    
+    .header-icon {
+        font-size: 28px;
+    }
+    
+    header h1 {
+        font-size: 20px;
+    }
+    
+    .header-buttons {
+        flex-direction: column;
+    }
+    
+    .md-button {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 20px auto;
+        border-radius: var(--md-sys-shape-corner-large);
+    }
+    
+    .modal-header,
+    .modal-body {
+        padding: 16px;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Promo Banner Mobile */
+    .promo-banner {
+        padding: 10px 12px;
+    }
+    
+    .promo-banner-content {
+        gap: 12px;
+    }
+    
+    .promo-banner .material-symbols-outlined {
+        font-size: 24px;
+    }
+    
+    .promo-text {
+        font-size: 14px;
+    }
+    
+    .promo-text strong {
+        font-size: 14px;
+    }
+    
+    .promo-link {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+    
+    #map {
+        margin-bottom: 80px;
+    }
+}
+
+/* Demo Notice */
+.demo-notice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 16px;
+    border-radius: var(--md-sys-shape-corner-small);
+    margin: 12px 0 8px;
+    font-size: 14px;
+    color: var(--md-sys-color-on-primary);
+}
+
+.demo-notice .material-symbols-outlined {
+    font-size: 20px;
+}
+
+@media (max-width: 480px) {
+    .modal-header h2 {
+        font-size: 20px;
+    }
+    
+    .code-display {
+        font-size: 18px;
+        letter-spacing: 1px;
+    }
+    
+    .demo-notice {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+    
+    .demo-notice span:last-child {
+        display: none;
+    }
+    
+    .demo-notice::after {
+        content: 'Демо-режим';
+    }
+}
