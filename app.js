@@ -39,11 +39,11 @@ function getFarmTypeName(type) {
 // Инициализация карты
 function initMap() {
     map = L.map('map').setView(CONFIG.MAP_CENTER, CONFIG.MAP_ZOOM);
-    
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
-    
+
     loadFarms();
 }
 
@@ -66,7 +66,7 @@ function displayFarms(farms) {
     // Очистка старых маркеров
     markers.forEach(marker => map.removeLayer(marker));
     markers = [];
-    
+
     // Добавление маркеров на карту
     farms.forEach(farm => {
         if (farm.lat && farm.lng) {
@@ -79,7 +79,7 @@ function displayFarms(farms) {
                 iconAnchor: [20, 40],
                 popupAnchor: [0, -40]
             });
-            
+
             const marker = L.marker([farm.lat, farm.lng], { icon: customIcon })
                 .addTo(map)
                 .on('click', () => {
@@ -90,7 +90,7 @@ function displayFarms(farms) {
                     }
                     showFarmInfo(farm);
                 });
-            
+
             // Добавляем tooltip с названием и типом
             const typeName = getFarmTypeName(farm.type);
             marker.bindTooltip(`${emoji} ${farm.name}<br><small>${typeName}</small>`, {
@@ -98,7 +98,7 @@ function displayFarms(farms) {
                 direction: 'top',
                 className: 'farm-tooltip'
             });
-            
+
             markers.push(marker);
         }
     });
@@ -119,7 +119,7 @@ document.getElementById('addFarmBtn').onclick = () => {
 
 // Закрытие модальных окон
 document.querySelectorAll('.close-btn').forEach(closeBtn => {
-    closeBtn.onclick = function() {
+    closeBtn.onclick = function () {
         this.closest('.modal').style.display = 'none';
     };
 });
@@ -137,11 +137,11 @@ document.getElementById('submitCodeBtn').onclick = async () => {
         alert('Введите код');
         return;
     }
-    
+
     try {
         const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=verifyCode&code=${code}`);
         const result = await response.json();
-        
+
         if (result.valid) {
             userCode = code;
             alert('Код принят! Теперь вы можете просматривать информацию о фермах и добавлять отзывы.');
@@ -163,7 +163,7 @@ starBtns.forEach(btn => {
     btn.onclick = () => {
         const rating = btn.dataset.rating;
         ratingInput.value = rating;
-        
+
         starBtns.forEach(b => {
             b.classList.toggle('active', b.dataset.rating <= rating);
         });
@@ -173,7 +173,7 @@ starBtns.forEach(btn => {
 // Отправка формы
 document.getElementById('farmForm').onsubmit = async (e) => {
     e.preventDefault();
-    
+
     const formData = {
         type: document.getElementById('farmType').value,
         name: document.getElementById('farmName').value,
@@ -187,20 +187,20 @@ document.getElementById('farmForm').onsubmit = async (e) => {
         duration: document.getElementById('farmDuration').value,
         userCode: userCode
     };
-    
+
     if (!formData.rating) {
         alert('Пожалуйста, поставьте оценку');
         return;
     }
-    
+
     try {
         const response = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
             method: 'POST',
             body: JSON.stringify(formData)
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
             // Показать сгенерированный код
             if (result.code && !userCode) {
@@ -212,10 +212,10 @@ document.getElementById('farmForm').onsubmit = async (e) => {
                 alert('Информация успешно добавлена!');
                 farmModal.style.display = 'none';
             }
-            
+
             // Обновить карту
             loadFarms();
-            
+
             // Очистить форму
             document.getElementById('farmForm').reset();
             starBtns.forEach(s => s.classList.remove('active'));
@@ -236,15 +236,15 @@ function showFarmInfo(farm) {
     for (let i = 1; i <= 5; i++) {
         starsHTML += `<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' ${i <= filledStars ? 1 : 0};">star</span>`;
     }
-    
+
     let operatorsHTML = '<div class="operators">';
     farm.operators.forEach(op => {
         operatorsHTML += `<span class="operator-tag">${op}</span>`;
     });
     operatorsHTML += '</div>';
-    
+
     let commentsHTML = '<div class="comments"><h3>Отзывы:</h3>';
-    
+
     // Рекламный комментарий White Tax Returns (всегда первый)
     commentsHTML += `
         <div class="comment promo-comment">
@@ -258,27 +258,46 @@ function showFarmInfo(farm) {
             <p>👉 <a href="https://whitetax.site/sng" target="_blank" rel="noopener">whitetax.site/sng</a> — для подачи заявки</p>
         </div>
     `;
-    
+
     // Отзывы пользователей
-    farm.reviews.forEach(review => {
+    farm.reviews.forEach((review, index) => {
         let reviewStarsHTML = '';
         for (let i = 1; i <= 5; i++) {
             reviewStarsHTML += `<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' ${i <= review.rating ? 1 : 0};">star</span>`;
         }
+
+        // Проверяем количество флагов
+        const flags = review.flags || 0;
+        const isHidden = flags >= 3;
+        const isSuspicious = flags >= 1 && flags < 3;
+
+        // Скрываем отзывы с 3+ флагами
+        if (isHidden) {
+            return;
+        }
+
         commentsHTML += `
-            <div class="comment">
+            <div class="comment ${isSuspicious ? 'suspicious-review' : ''}" data-review-index="${index}">
+                ${isSuspicious ? '<div class="warning-badge">⚠️ Спорный отзыв</div>' : ''}
                 <div class="comment-rating">${reviewStarsHTML}</div>
                 <p>${review.comment || 'Без комментария'}</p>
                 ${review.earnings ? `<p><strong>Заработок:</strong> £${review.earnings}</p>` : ''}
                 ${review.duration ? `<p><strong>Длительность:</strong> ${review.duration} мес.</p>` : ''}
+                <div class="review-actions">
+                    <button class="report-btn" onclick="reportReview('${farm.postcode}', ${index})">
+                        <span class="material-symbols-outlined">flag</span>
+                        Пожаловаться
+                    </button>
+                    ${flags > 0 ? `<span class="flag-count">🚩 ${flags} жалоб${flags === 1 ? 'а' : flags < 5 ? 'ы' : ''}</span>` : ''}
+                </div>
             </div>
         `;
     });
     commentsHTML += '</div>';
-    
+
     const farmEmoji = getFarmEmoji(farm.type);
     const farmTypeName = getFarmTypeName(farm.type);
-    
+
     const infoHTML = `
         <div style="text-align: center; font-size: 48px; margin-bottom: 16px;">${farmEmoji}</div>
         <h2>${farm.name}</h2>
@@ -291,10 +310,53 @@ function showFarmInfo(farm) {
         ${operatorsHTML}
         ${commentsHTML}
     `;
-    
+
     document.getElementById('farmInfo').innerHTML = infoHTML;
     infoModal.style.display = 'block';
 }
+
+// Функция жалобы на отзыв
+window.reportReview = async function (postcode, reviewIndex) {
+    // Проверяем авторизацию
+    if (!userCode) {
+        alert('Только авторизованные пользователи могут жаловаться на отзывы.\n\nДобавьте свой отзыв или введите код доступа.');
+        return;
+    }
+
+    // Запрашиваем причину
+    const reason = prompt('Почему этот отзыв недостоверный?\n\n(Например: "Я работал на этой ферме, информация не соответствует действительности")\n\nПричина (опционально):');
+
+    // Если пользователь отменил
+    if (reason === null) {
+        return;
+    }
+
+    try {
+        const response = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'reportReview',
+                postcode: postcode,
+                reviewIndex: reviewIndex,
+                reason: reason || 'Причина не указана',
+                reporterCode: userCode
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert('✅ Спасибо! Жалоба отправлена.\n\nМы проверим этот отзыв. Если будет 3+ жалобы, отзыв будет скрыт автоматически.');
+            // Обновить данные
+            loadFarms();
+        } else {
+            alert('❌ Ошибка: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Ошибка отправки жалобы:', error);
+        alert('❌ Не удалось отправить жалобу. Попробуйте позже.');
+    }
+};
 
 // Инициализация при загрузке
 window.onload = initMap;
