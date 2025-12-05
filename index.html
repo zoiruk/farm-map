@@ -17,10 +17,7 @@
                     <span class="material-symbols-outlined header-icon">agriculture</span>
                     <h1>Карта ферм Великобритании</h1>
                 </div>
-                <div id="demoNotice" class="demo-notice" style="display:none;">
-                    <span class="material-symbols-outlined">info</span>
-                    <span>Демо-режим: Показаны тестовые данные. Настройте Google Apps Script для полной функциональности.</span>
-                </div>
+
                 <div class="header-buttons">
                     <button id="addFarmBtn" class="md-button md-filled-button">
                         <span class="material-symbols-outlined">add_circle</span>
@@ -83,6 +80,19 @@
                 </div>
                 <div class="modal-body">
                     <form id="farmForm">
+                        <div class="md-select">
+                            <select id="farmType" required>
+                                <option value="">Выберите тип фермы</option>
+                                <option value="vegetables">🥬 Овощная ферма</option>
+                                <option value="tomatoes">🍅 Томатная ферма</option>
+                                <option value="berries">🍓 Ягодная ферма</option>
+                                <option value="mushrooms">🍄‍🟫 Грибная ферма</option>
+                                <option value="flowers">🌷 Цветочная ферма</option>
+                                <option value="apples">🍎 Яблочная ферма</option>
+                            </select>
+                            <label>Тип фермы *</label>
+                        </div>
+
                         <div class="md-text-field">
                             <input type="text" id="farmName" placeholder=" " required>
                             <label>Название фермы *</label>
