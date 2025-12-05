@@ -635,6 +635,34 @@ header h1 {
     font-size: 20px;
 }
 
+/* Emoji Markers */
+.emoji-marker {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.emoji-marker:hover {
+    transform: scale(1.2);
+}
+
+/* Farm Tooltip */
+.farm-tooltip {
+    background: white;
+    border: 2px solid var(--md-sys-color-primary);
+    border-radius: var(--md-sys-shape-corner-small);
+    padding: 8px 12px;
+    font-family: 'Roboto', sans-serif;
+    box-shadow: var(--md-sys-elevation-2);
+    text-align: center;
+}
+
+.farm-tooltip small {
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 12px;
+}
+
 /* Leaflet Popup Customization */
 .leaflet-popup-content-wrapper {
     border-radius: var(--md-sys-shape-corner-medium);
@@ -718,22 +746,6 @@ header h1 {
     }
 }
 
-/* Demo Notice */
-.demo-notice {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(255, 255, 255, 0.2);
-    padding: 8px 16px;
-    border-radius: var(--md-sys-shape-corner-small);
-    margin: 12px 0 8px;
-    font-size: 14px;
-    color: var(--md-sys-color-on-primary);
-}
-
-.demo-notice .material-symbols-outlined {
-    font-size: 20px;
-}
 
 @media (max-width: 480px) {
     .modal-header h2 {
@@ -743,18 +755,5 @@ header h1 {
     .code-display {
         font-size: 18px;
         letter-spacing: 1px;
-    }
-    
-    .demo-notice {
-        font-size: 12px;
-        padding: 6px 12px;
-    }
-    
-    .demo-notice span:last-child {
-        display: none;
-    }
-    
-    .demo-notice::after {
-        content: 'Демо-режим';
     }
 }
