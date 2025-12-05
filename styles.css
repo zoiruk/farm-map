@@ -498,6 +498,63 @@ header h1 {
     line-height: 1.5;
 }
 
+/* Спорный отзыв */
+.comment.suspicious-review {
+    border: 2px solid #ff9800;
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+}
+
+.warning-badge {
+    display: inline-block;
+    background: #ff9800;
+    color: white;
+    padding: 6px 12px;
+    border-radius: var(--md-sys-shape-corner-small);
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 12px;
+}
+
+/* Действия с отзывом */
+.review-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.report-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 1px solid var(--md-sys-color-outline);
+    color: var(--md-sys-color-on-surface-variant);
+    padding: 6px 16px;
+    border-radius: var(--md-sys-shape-corner-extra-large);
+    font-size: 13px;
+    font-family: 'Roboto', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.report-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: var(--md-sys-color-on-surface);
+}
+
+.report-btn .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.flag-count {
+    color: #f44336;
+    font-size: 13px;
+    font-weight: 500;
+}
+
 /* Promo Comment - White Tax Returns */
 .promo-comment {
     background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
