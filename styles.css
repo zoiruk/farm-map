@@ -304,6 +304,20 @@ header h1 {
     color: var(--md-sys-color-primary);
 }
 
+/* Autocomplete datalist */
+datalist {
+    display: none;
+}
+
+/* Стили для браузерного автодополнения */
+input[list]::-webkit-calendar-picker-indicator {
+    display: none;
+}
+
+input[list]::-webkit-list-button {
+    display: none;
+}
+
 /* Select */
 .md-select {
     position: relative;
