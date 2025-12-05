@@ -10,6 +10,32 @@ if (tg) {
     tg.expand();
 }
 
+// Получение эмодзи по типу фермы
+function getFarmEmoji(type) {
+    const emojis = {
+        'vegetables': '🥬',
+        'tomatoes': '🍅',
+        'berries': '🍓',
+        'mushrooms': '🍄',
+        'flowers': '🌷',
+        'apples': '🍎'
+    };
+    return emojis[type] || '🌾';
+}
+
+// Получение названия типа фермы
+function getFarmTypeName(type) {
+    const names = {
+        'vegetables': 'Овощная ферма',
+        'tomatoes': 'Томатная ферма',
+        'berries': 'Ягодная ферма',
+        'mushrooms': 'Грибная ферма',
+        'flowers': 'Цветочная ферма',
+        'apples': 'Яблочная ферма'
+    };
+    return names[type] || 'Ферма';
+}
+
 // Инициализация карты
 function initMap() {
     map = L.map('map').setView(CONFIG.MAP_CENTER, CONFIG.MAP_ZOOM);
@@ -21,142 +47,17 @@ function initMap() {
     loadFarms();
 }
 
-// Тестовые данные для демо-режима
-const DEMO_FARMS = [
-    {
-        name: "Charltons Farm",
-        address: "Maidstone, Kent",
-        postcode: "ME17 3ND",
-        email: "info@charltonsfarms.co.uk",
-        operators: ["Fruitful Jobs", "Agri HR", "Concordia", "HOPS"],
-        avgRating: 4.5,
-        reviews: [
-            { rating: 5, comment: "Отличная ферма, хорошие условия проживания", earnings: 3500, duration: 4 },
-            { rating: 4, comment: "Много работы, дружный коллектив", earnings: 4200, duration: 5 }
-        ],
-        lat: 51.2787,
-        lng: 0.5217
-    },
-    {
-        name: "Berry Farming Ltd",
-        address: "Littlehampton, West Sussex",
-        postcode: "BN18 0DF",
-        email: "monika.boduszek@ai-ltd.com",
-        operators: ["Fruitful Jobs", "Pro-Force", "HOPS"],
-        avgRating: 4.2,
-        reviews: [
-            { rating: 4, comment: "Хорошая оплата, много клубники", earnings: 3800, duration: 3 },
-            { rating: 4, comment: "Рекомендую для новичков", earnings: 3200, duration: 4 }
-        ],
-        lat: 50.8097,
-        lng: -0.5406
-    },
-    {
-        name: "GS The Lettuce Company",
-        address: "Ely, Cambridgeshire",
-        postcode: "CB7 5TZ",
-        email: "careers@gs-fresh.com",
-        operators: ["Fruitful Jobs", "Concordia", "Pro-Force", "HOPS"],
-        avgRating: 4.0,
-        reviews: [
-            { rating: 4, comment: "Большая компания, стабильная работа", earnings: 3600, duration: 6 }
-        ],
-        lat: 52.3990,
-        lng: 0.2623
-    },
-    {
-        name: "Thanet Earth",
-        address: "Birchington, Kent",
-        postcode: "CT7 0AX",
-        email: "HR@thanetearth.com",
-        operators: ["Pro-Force"],
-        avgRating: 4.3,
-        reviews: [
-            { rating: 5, comment: "Современные теплицы, работа круглый год", earnings: 4500, duration: 6 },
-            { rating: 4, comment: "Хорошие условия труда", earnings: 4000, duration: 5 }
-        ],
-        lat: 51.3761,
-        lng: 1.3042
-    },
-    {
-        name: "Haygrove Ltd",
-        address: "Ledbury, Herefordshire",
-        postcode: "HR8 2JL",
-        email: "neli.manukova@haygrove.co.uk",
-        operators: ["Fruitful Jobs", "Pro-Force"],
-        avgRating: 4.7,
-        reviews: [
-            { rating: 5, comment: "Лучшая ферма! Отличный менеджмент", earnings: 4800, duration: 5 },
-            { rating: 5, comment: "Очень рекомендую", earnings: 5000, duration: 6 },
-            { rating: 4, comment: "Хорошая оплата и условия", earnings: 4200, duration: 4 }
-        ],
-        lat: 52.0364,
-        lng: -2.4258
-    },
-    {
-        name: "Allanhill Farming Company",
-        address: "St Andrews, Fife",
-        postcode: "KY16 8LJ",
-        email: "Info@allanhill.co.uk",
-        operators: ["Fruitful Jobs", "AGRI HR", "Concordia", "Pro-Force", "HOPS"],
-        avgRating: 4.4,
-        reviews: [
-            { rating: 4, comment: "Хорошая ферма в Шотландии", earnings: 3900, duration: 4 },
-            { rating: 5, comment: "Красивые места, дружелюбные люди", earnings: 4100, duration: 5 }
-        ],
-        lat: 56.3398,
-        lng: -2.7967
-    },
-    {
-        name: "Barfoot Farms",
-        address: "Chichester, West Sussex",
-        postcode: "PO21 3PX",
-        email: "info@barfoots.co.uk",
-        operators: ["Pro-Force"],
-        avgRating: 4.1,
-        reviews: [
-            { rating: 4, comment: "Много разной работы, интересно", earnings: 3700, duration: 5 }
-        ],
-        lat: 50.8429,
-        lng: -0.7751
-    },
-    {
-        name: "Place UK Ltd",
-        address: "Great Yarmouth, Norfolk",
-        postcode: "NR12 8RQ",
-        email: "info@placeuk.com",
-        operators: ["Fruitful Jobs", "Pro-Force", "HOPS"],
-        avgRating: 3.9,
-        reviews: [
-            { rating: 4, comment: "Нормальная ферма, стабильная работа", earnings: 3400, duration: 4 }
-        ],
-        lat: 52.6309,
-        lng: 1.7297
-    }
-];
+
 
 // Загрузка ферм с сервера
 async function loadFarms() {
     try {
-        // Если включен демо-режим, используем тестовые данные
-        if (CONFIG.DEMO_MODE) {
-            displayFarms(DEMO_FARMS);
-            return;
-        }
-        
         const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=getFarms`);
         const farms = await response.json();
         displayFarms(farms);
     } catch (error) {
         console.error('Ошибка загрузки ферм:', error);
-        
-        // В случае ошибки показываем демо-данные
-        if (CONFIG.DEMO_MODE || CONFIG.GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_SCRIPT_URL_HERE') {
-            console.log('Используются демо-данные');
-            displayFarms(DEMO_FARMS);
-        } else {
-            alert('Не удалось загрузить данные. Проверьте настройки в config.js');
-        }
+        alert('Не удалось загрузить данные. Проверьте настройки в config.js');
     }
 }
 
@@ -169,9 +70,35 @@ function displayFarms(farms) {
     // Добавление маркеров на карту
     farms.forEach(farm => {
         if (farm.lat && farm.lng) {
-            const marker = L.marker([farm.lat, farm.lng])
+            // Создаем кастомную иконку с эмодзи
+            const emoji = getFarmEmoji(farm.type);
+            const customIcon = L.divIcon({
+                html: `<div style="font-size: 32px; text-align: center; line-height: 1;">${emoji}</div>`,
+                className: 'emoji-marker',
+                iconSize: [40, 40],
+                iconAnchor: [20, 40],
+                popupAnchor: [0, -40]
+            });
+            
+            const marker = L.marker([farm.lat, farm.lng], { icon: customIcon })
                 .addTo(map)
-                .on('click', () => showFarmInfo(farm));
+                .on('click', () => {
+                    // Проверяем авторизацию пользователя
+                    if (!userCode) {
+                        alert('Чтобы просматривать информацию о фермах, необходимо добавить свой отзыв или ввести код доступа.');
+                        return;
+                    }
+                    showFarmInfo(farm);
+                });
+            
+            // Добавляем tooltip с названием и типом
+            const typeName = getFarmTypeName(farm.type);
+            marker.bindTooltip(`${emoji} ${farm.name}<br><small>${typeName}</small>`, {
+                permanent: false,
+                direction: 'top',
+                className: 'farm-tooltip'
+            });
+            
             markers.push(marker);
         }
     });
@@ -211,29 +138,14 @@ document.getElementById('submitCodeBtn').onclick = async () => {
         return;
     }
     
-    // Демо-режим
-    if (CONFIG.DEMO_MODE || CONFIG.GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_SCRIPT_URL_HERE') {
-        // В демо-режиме принимаем любой код формата FM********
-        if (code.startsWith('FM') && code.length >= 4) {
-            userCode = code;
-            alert('ДЕМО-РЕЖИМ: Код принят! Теперь вы можете добавлять информацию.');
-            codeModal.style.display = 'none';
-            farmModal.style.display = 'block';
-        } else {
-            alert('Неверный формат кода. Используйте формат: FM12345678');
-        }
-        return;
-    }
-    
     try {
         const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=verifyCode&code=${code}`);
         const result = await response.json();
         
         if (result.valid) {
             userCode = code;
-            alert('Код принят! Теперь вы можете добавлять информацию.');
+            alert('Код принят! Теперь вы можете просматривать информацию о фермах и добавлять отзывы.');
             codeModal.style.display = 'none';
-            farmModal.style.display = 'block';
         } else {
             alert('Неверный код');
         }
@@ -263,6 +175,7 @@ document.getElementById('farmForm').onsubmit = async (e) => {
     e.preventDefault();
     
     const formData = {
+        type: document.getElementById('farmType').value,
         name: document.getElementById('farmName').value,
         address: document.getElementById('farmAddress').value,
         postcode: document.getElementById('farmPostcode').value.toUpperCase(),
@@ -277,27 +190,6 @@ document.getElementById('farmForm').onsubmit = async (e) => {
     
     if (!formData.rating) {
         alert('Пожалуйста, поставьте оценку');
-        return;
-    }
-    
-    // Демо-режим
-    if (CONFIG.DEMO_MODE || CONFIG.GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_SCRIPT_URL_HERE') {
-        alert('ДЕМО-РЕЖИМ: Данные не сохранены. Настройте Google Apps Script для сохранения данных.');
-        
-        // Генерируем демо-код
-        if (!userCode) {
-            const demoCode = 'FM' + Math.random().toString(36).substr(2, 8).toUpperCase();
-            userCode = demoCode;
-            document.querySelector('.code-display').textContent = demoCode;
-            document.getElementById('generatedCode').style.display = 'block';
-            document.getElementById('farmForm').style.display = 'none';
-        } else {
-            farmModal.style.display = 'none';
-        }
-        
-        // Очистить форму
-        document.getElementById('farmForm').reset();
-        starBtns.forEach(s => s.classList.remove('active'));
         return;
     }
     
@@ -384,8 +276,13 @@ function showFarmInfo(farm) {
     });
     commentsHTML += '</div>';
     
+    const farmEmoji = getFarmEmoji(farm.type);
+    const farmTypeName = getFarmTypeName(farm.type);
+    
     const infoHTML = `
+        <div style="text-align: center; font-size: 48px; margin-bottom: 16px;">${farmEmoji}</div>
         <h2>${farm.name}</h2>
+        <p style="color: var(--md-sys-color-primary); font-weight: 500; margin-bottom: 12px;">${farmTypeName}</p>
         <p><strong>Адрес:</strong> ${farm.address}</p>
         <p><strong>Postcode:</strong> ${farm.postcode}</p>
         ${farm.email ? `<p><strong>Email:</strong> ${farm.email}</p>` : ''}
@@ -400,11 +297,4 @@ function showFarmInfo(farm) {
 }
 
 // Инициализация при загрузке
-window.onload = () => {
-    initMap();
-    
-    // Показать уведомление о демо-режиме
-    if (CONFIG.DEMO_MODE || CONFIG.GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_SCRIPT_URL_HERE') {
-        document.getElementById('demoNotice').style.display = 'flex';
-    }
-};
+window.onload = initMap;
