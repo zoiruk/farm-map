@@ -94,6 +94,42 @@ header h1 {
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
+    align-items: center;
+}
+
+/* User Info */
+#userInfo {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 8px 16px;
+    border-radius: var(--md-sys-shape-corner-extra-large);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#userEmail {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-primary);
+}
+
+#logoutBtn {
+    background: transparent;
+    border: none;
+    color: var(--md-sys-color-on-primary);
+    padding: 4px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#logoutBtn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+#logoutBtn .material-symbols-outlined {
+    font-size: 20px;
 }
 
 /* Material Design 3 Buttons */
@@ -154,6 +190,34 @@ header h1 {
     border: 1px solid currentColor;
 }
 
+/* Text Button */
+.md-text-button {
+    background: transparent;
+    color: var(--md-sys-color-primary);
+    border: none;
+    padding: 8px 12px;
+}
+
+.md-text-button:hover {
+    background: rgba(46, 125, 50, 0.08);
+}
+
+/* Button variants for different contexts */
+.md-button.surface-variant {
+    background: var(--md-sys-color-surface-variant);
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+.md-button.error {
+    background: var(--md-sys-color-error);
+    color: var(--md-sys-color-on-error);
+}
+
+.md-button.secondary {
+    background: var(--md-sys-color-secondary);
+    color: var(--md-sys-color-on-secondary);
+}
+
 .full-width {
     width: 100%;
     justify-content: center;
@@ -211,6 +275,69 @@ header h1 {
     }
 }
 
+/* Loading State */
+.loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Focus States */
+.md-button:focus-visible {
+    outline: 2px solid var(--md-sys-color-primary);
+    outline-offset: 2px;
+}
+
+.md-text-field input:focus-visible,
+.md-text-field textarea:focus-visible,
+.md-select select:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--md-sys-color-primary);
+}
+
+/* Ripple Effect */
+.md-button {
+    position: relative;
+    overflow: hidden;
+}
+
+.md-button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+}
+
+.md-button:active::after {
+    width: 300px;
+    height: 300px;
+}
+
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -248,6 +375,61 @@ header h1 {
 
 .modal-body {
     padding: 0 24px 24px;
+}
+
+/* Auth Modal Specific Styles */
+.auth-icon {
+    font-size: 64px;
+    color: var(--md-sys-color-primary);
+    margin-bottom: 16px;
+}
+
+.auth-title {
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--md-sys-color-on-surface);
+    margin-bottom: 8px;
+}
+
+.auth-description {
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 24px;
+}
+
+.auth-divider {
+    text-align: center;
+    margin: 24px 0;
+    color: var(--md-sys-color-outline);
+    font-size: 14px;
+    position: relative;
+}
+
+.auth-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--md-sys-color-outline-variant);
+    z-index: 1;
+}
+
+.auth-divider span {
+    background: var(--md-sys-color-surface);
+    padding: 0 16px;
+    position: relative;
+    z-index: 2;
+}
+
+.auth-note {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+    text-align: center;
+    margin-top: 16px;
+    line-height: 1.4;
 }
 
 /* Material Design 3 Text Fields */
@@ -304,18 +486,69 @@ header h1 {
     color: var(--md-sys-color-primary);
 }
 
-/* Autocomplete datalist */
-datalist {
-    display: none;
+/* Autocomplete wrapper */
+.autocomplete-wrapper {
+    position: relative;
 }
 
-/* Стили для браузерного автодополнения */
-input[list]::-webkit-calendar-picker-indicator {
+/* Список подсказок */
+.suggestions-list {
     display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--md-sys-color-surface);
+    border: 1px solid var(--md-sys-color-outline);
+    border-radius: var(--md-sys-shape-corner-small);
+    box-shadow: var(--md-sys-elevation-2);
+    max-height: 240px;
+    overflow-y: auto;
+    z-index: 1000;
+    margin-top: 4px;
 }
 
-input[list]::-webkit-list-button {
-    display: none;
+/* Элемент подсказки */
+.suggestion-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 16px;
+    color: var(--md-sys-color-on-surface);
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:hover {
+    background: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+}
+
+.suggestion-item:active {
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+}
+
+/* Скроллбар для списка подсказок */
+.suggestions-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.suggestions-list::-webkit-scrollbar-track {
+    background: var(--md-sys-color-surface-variant);
+    border-radius: 4px;
+}
+
+.suggestions-list::-webkit-scrollbar-thumb {
+    background: var(--md-sys-color-outline);
+    border-radius: 4px;
+}
+
+.suggestions-list::-webkit-scrollbar-thumb:hover {
+    background: var(--md-sys-color-on-surface-variant);
 }
 
 /* Select */
@@ -814,6 +1047,91 @@ input[list]::-webkit-list-button {
     
     #map {
         margin-bottom: 80px;
+    }
+}
+
+/* Dark Theme Support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* MD3 Color Tokens - Dark Theme */
+        --md-sys-color-primary: #81c784;
+        --md-sys-color-on-primary: #003910;
+        --md-sys-color-primary-container: #00531a;
+        --md-sys-color-on-primary-container: #9dd49f;
+        
+        --md-sys-color-secondary: #b8ccb9;
+        --md-sys-color-on-secondary: #243426;
+        --md-sys-color-secondary-container: #3a4b3c;
+        --md-sys-color-on-secondary-container: #d4e8d5;
+        
+        --md-sys-color-surface: #101418;
+        --md-sys-color-surface-variant: #414943;
+        --md-sys-color-on-surface: #e1e2e8;
+        --md-sys-color-on-surface-variant: #c1c9c1;
+        
+        --md-sys-color-background: #0f1419;
+        --md-sys-color-on-background: #e1e2e8;
+        
+        --md-sys-color-error: #ffb4ab;
+        --md-sys-color-on-error: #690005;
+        
+        --md-sys-color-outline: #8b9389;
+        --md-sys-color-outline-variant: #414943;
+    }
+    
+    /* Dark theme specific adjustments */
+    .promo-banner {
+        background: linear-gradient(135deg, var(--md-sys-color-primary-container) 0%, #00531a 100%);
+    }
+    
+    .promo-comment {
+        background: linear-gradient(135deg, #1a2e1b 0%, #243426 100%);
+        border-color: var(--md-sys-color-primary);
+    }
+    
+    .comment.suspicious-review {
+        background: linear-gradient(135deg, #2d1b00 0%, #3d2500 100%);
+        border-color: #ff9800;
+    }
+    
+    .farm-tooltip {
+        background: var(--md-sys-color-surface);
+        color: var(--md-sys-color-on-surface);
+    }
+}
+
+/* High Contrast Support */
+@media (prefers-contrast: high) {
+    :root {
+        --md-sys-color-outline: #000000;
+        --md-sys-color-outline-variant: #333333;
+    }
+    
+    .md-button {
+        border: 2px solid currentColor;
+    }
+    
+    .md-text-field input,
+    .md-text-field textarea,
+    .md-select select {
+        border-width: 2px;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .modal-content {
+        animation: none;
+    }
+    
+    .promo-banner {
+        animation: none;
     }
 }
 
