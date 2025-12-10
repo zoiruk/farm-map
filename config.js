@@ -140,6 +140,20 @@ const CONFIG = {
         ENABLED: false
     },
     
+    // Telegram Web App Configuration
+    TELEGRAM_WEB_APP: {
+        ENABLED: true,
+        BOT_USERNAME: 'YOUR_BOT_USERNAME', // Например: ukfarmsbot
+        THEME_PARAMS: {
+            bg_color: '#ffffff',
+            text_color: '#000000',
+            hint_color: '#999999',
+            link_color: '#2e7d32',
+            button_color: '#2e7d32',
+            button_text_color: '#ffffff'
+        }
+    },
+    
     // Application Settings
     APP_SETTINGS: {
         MAX_REVIEWS_PER_FARM: 50,
