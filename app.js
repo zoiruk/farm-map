@@ -479,6 +479,11 @@ class UKFarmsMap {
         //     this.showModal('loginModal');
         // });
 
+        // Refresh button
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+            this.manualRefresh();
+        });
+
         // Statistics button
         document.getElementById('statsBtn').addEventListener('click', () => {
             this.showStatsModal();
@@ -1665,8 +1670,10 @@ class UKFarmsMap {
 
     // Mobile Gestures and Touch Support
     initMobileGestures() {
-        // Pull-to-refresh
-        this.initPullToRefresh();
+        // Pull-to-refresh (можно включить в config.js)
+        if (CONFIG.APP_SETTINGS.ENABLE_PULL_TO_REFRESH) {
+            this.initPullToRefresh();
+        }
         
         // Modal swipe gestures
         this.initModalSwipes();
@@ -1769,6 +1776,31 @@ class UKFarmsMap {
             this.showNotification('Данные обновлены', 'success');
         } catch (error) {
             this.showNotification('Ошибка при обновлении', 'error');
+        }
+    }
+
+    async manualRefresh() {
+        const refreshBtn = document.getElementById('refreshBtn');
+        const icon = refreshBtn.querySelector('.material-symbols-outlined');
+        
+        // Анимация вращения кнопки
+        icon.style.animation = 'spin 1s linear infinite';
+        refreshBtn.disabled = true;
+        
+        this.showNotification('Обновление данных...', 'info');
+        this.triggerHapticFeedback('light');
+        
+        try {
+            await this.loadFarms();
+            this.showNotification('Данные успешно обновлены!', 'success');
+            this.triggerHapticFeedback('success');
+        } catch (error) {
+            this.showNotification('Ошибка при обновлении данных', 'error');
+            this.triggerHapticFeedback('error');
+        } finally {
+            // Убираем анимацию и включаем кнопку
+            icon.style.animation = '';
+            refreshBtn.disabled = false;
         }
     }
 
