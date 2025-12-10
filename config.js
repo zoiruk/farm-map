@@ -1,213 +1,506 @@
-// Configuration file for UK Farms Map
-const CONFIG = {
-    // Google Apps Script Web App URL
-    GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwVnffKa598iycfvc0PykSelo5PSnsG-jP8sEmszud4itCbxKw1aM4RqpNNtH-wO_Zv/exec',
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карта Ферм Великобритании - Сезонные Работники</title>
     
-    // Postcodes.io API
-    POSTCODES_API_URL: 'https://api.postcodes.io/postcodes',
+    <!-- Material Design 3 -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
     
-    // Map Configuration
-    MAP_CONFIG: {
-        center: [54.5, -3.5], // UK center coordinates
-        zoom: 6,
-        minZoom: 5,
-        maxZoom: 18
-    },
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
-    // Farm Types with emojis
-    FARM_TYPES: {
-        vegetables: { emoji: '🥬', name: 'Овощная ферма', color: '#4caf50' },
-        tomatoes: { emoji: '🍅', name: 'Томатная ферма', color: '#f44336' },
-        berries: { emoji: '🍓', name: 'Ягодная ферма', color: '#e91e63' },
-        mushrooms: { emoji: '🍄', name: 'Грибная ферма', color: '#795548' },
-        flowers: { emoji: '🌷', name: 'Цветочная ферма', color: '#9c27b0' },
-        apples: { emoji: '🍎', name: 'Яблочная ферма', color: '#ff5722' }
-    },
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
     
-    // Seasonal Worker Programme Operators
-    OPERATORS: [
-        'AgriHR',
-        'Concordia',
-        'Fruitful Jobs',
-        'Pro-Force',
-        'HOPS'
-    ],
+    <!-- Meta tags -->
+    <meta name="description" content="Интерактивная карта ферм Великобритании для сезонных работников с отзывами и рейтингами">
+    <meta name="keywords" content="фермы, Великобритания, сезонная работа, seasonal worker, UK farms">
+    <meta name="author" content="UK Farms Map">
     
-    // Famous UK Farms Database (200+ farms)
-    FAMOUS_FARMS: [
-        // Vegetable Farms
-        'G\'s Fresh', 'Barfoots of Botley', 'Greenyard Fresh UK', 'Produce World',
-        'Staples Vegetables', 'Huntapac Produce', 'Reynolds Catering Supplies',
-        'Cornerways Nursery', 'Thanet Earth', 'APS Salads', 'Vitacress Salads',
-        'Bakkavor', 'Florette UK', 'Organic Farm Foods', 'Riverford Organic Farmers',
-        
-        // Berry Farms
-        'Berry Gardens', 'Haygrove', 'S&A Produce', 'Driscoll\'s', 'Hall Hunter Partnership',
-        'Clock House Farm', 'Tanner\'s Farm Park', 'Parkside Farm', 'Grange Farm Fruits',
-        'Blackmoor Estate', 'Wexcombe Farm', 'Crockford Bridge Farm', 'Kenyon Hall Farm',
-        'Essington Fruit Farm', 'Foxendown Farm', 'Parkside Soft Fruits',
-        
-        // Apple Farms
-        'Worldwide Fruit', 'AC Hulme', 'Stocks Farm', 'Loddington Farm', 'Avalon Produce',
-        'Kent Blaxill', 'Adrian Scripps', 'Frank P Matthews', 'Bardsley England',
-        'Mansfields Fruit Farm', 'Chegworth Valley', 'Brogdale Farm', 'Roughway Farm',
-        'Court Lodge Farm', 'Blackmoor Estate', 'Stocks Farm Shop',
-        
-        // Flower Farms
-        'Flamingo Horticulture', 'Dümmen Orange', 'Selecta One', 'Kernock Park Plants',
-        'Wyevale Garden Centres', 'Thompson & Morgan', 'Johnsons Seeds',
-        'Unwins Seeds', 'Mr Fothergill\'s Seeds', 'Suttons Seeds', 'Kings Seeds',
-        'Chiltern Seeds', 'Dobies Garden World', 'Crocus', 'Sarah Raven',
-        
-        // Mushroom Farms
-        'Monaghan Mushrooms', 'Lutece Holdings', 'Smithy Mushrooms', 'Highline Mushrooms',
-        'Oaklands Mushrooms', 'Sylvan UK', 'Amycel UK', 'Italspawn UK',
-        'Middlebrook Mushrooms', 'Chesswood Mushrooms', 'Meadow Mushrooms',
-        
-        // Tomato Farms
-        'Thanet Earth', 'APS Group', 'Cornerways Nursery', 'Flavourfresh',
-        'Wight Salads Group', 'Langmead Group', 'Greenyard Fresh UK',
-        'Elsoms Seeds', 'Syngenta Seeds', 'Rijk Zwaan UK', 'Enza Zaden UK',
-        
-        // Mixed/Large Farms
-        'Velcourt', 'Eurofresh Distribution', 'Total Produce', 'Fyffes',
-        'Fresh Direct', 'Reynolds', 'Nationwide Produce', 'Freshtime UK',
-        'Wealmoor', 'Poupart Imports', 'Mack Multiples', 'Fresca Group',
-        'Primafruit', 'Pearson Partnership', 'Redbridge Holdings',
-        
-        // Regional Farms - England
-        'Spalding Produce', 'Lincolnshire Field Products', 'Norfolk Herbs',
-        'Suffolk Sweet', 'Essex Growers', 'Kent Garden Produce', 'Surrey Farms',
-        'Hampshire Growers', 'Dorset Cereals', 'Devon Farm Fresh', 'Cornwall Growers',
-        'Somerset Organics', 'Gloucestershire Produce', 'Worcestershire Farms',
-        'Herefordshire Orchards', 'Shropshire Organics', 'Staffordshire Growers',
-        'Warwickshire Produce', 'Northamptonshire Farms', 'Bedfordshire Growers',
-        'Hertfordshire Fresh', 'Buckinghamshire Organics', 'Oxfordshire Farms',
-        'Berkshire Produce', 'Wiltshire Growers', 'Cambridgeshire Organics',
-        'Nottinghamshire Farms', 'Leicestershire Produce', 'Rutland Organics',
-        'Derbyshire Growers', 'Cheshire Farms', 'Lancashire Produce',
-        'Greater Manchester Growers', 'Merseyside Organics', 'Cumbria Farms',
-        'Northumberland Produce', 'Durham Growers', 'Tyne and Wear Organics',
-        'Yorkshire Dales Farms', 'North Yorkshire Produce', 'West Yorkshire Growers',
-        'South Yorkshire Organics', 'East Yorkshire Farms',
-        
-        // Regional Farms - Scotland
-        'Highland Fresh', 'Grampian Growers', 'Tayside Produce', 'Central Scotland Farms',
-        'Fife Organics', 'Lothian Growers', 'Borders Produce', 'Dumfries Farms',
-        'Galloway Organics', 'Ayrshire Growers', 'Lanarkshire Produce',
-        'Stirlingshire Farms', 'Clackmannanshire Organics', 'Falkirk Growers',
-        'West Lothian Produce', 'Midlothian Farms', 'East Lothian Organics',
-        'Scottish Borders Growers', 'Argyll Fresh', 'Bute Produce',
-        'Inverclyde Farms', 'Renfrewshire Organics', 'East Dunbartonshire Growers',
-        'West Dunbartonshire Produce', 'North Lanarkshire Farms',
-        'South Lanarkshire Organics', 'Glasgow City Growers', 'Edinburgh Produce',
-        'Dundee City Farms', 'Aberdeen City Organics', 'Orkney Islands Growers',
-        'Shetland Islands Produce', 'Western Isles Farms', 'Highland Organics',
-        'Moray Growers', 'Aberdeenshire Produce', 'Angus Farms', 'Perth Organics',
-        'Kinross Growers', 'Clackmannanshire Produce',
-        
-        // Regional Farms - Wales
-        'Gwynedd Fresh', 'Anglesey Produce', 'Conwy Growers', 'Denbighshire Organics',
-        'Flintshire Farms', 'Wrexham Produce', 'Powys Growers', 'Ceredigion Organics',
-        'Pembrokeshire Farms', 'Carmarthenshire Produce', 'Swansea Growers',
-        'Neath Port Talbot Organics', 'Bridgend Farms', 'Vale of Glamorgan Produce',
-        'Cardiff Growers', 'Rhondda Cynon Taf Organics', 'Merthyr Tydfil Farms',
-        'Caerphilly Produce', 'Blaenau Gwent Growers', 'Torfaen Organics',
-        'Monmouthshire Farms', 'Newport Produce',
-        
-        // Regional Farms - Northern Ireland
-        'Antrim Fresh', 'Armagh Orchards', 'Down Produce', 'Fermanagh Growers',
-        'Londonderry Organics', 'Tyrone Farms', 'Belfast Produce',
-        
-        // Organic Specialists
-        'Soil Association Farms', 'Organic Farmers & Growers', 'Demeter Certified',
-        'Biodynamic Association', 'Organic Trust', 'Quality Welsh Food',
-        'Red Tractor Assured', 'LEAF Marque', 'RSPCA Assured',
-        
-        // Specialty Crops
-        'British Asparagus Growers', 'English Wine Producers', 'Hop Growers',
-        'Lavender Farms UK', 'Christmas Tree Growers', 'Herb Specialists',
-        'Watercress Growers', 'Rhubarb Producers', 'Leek Growers',
-        'Brussels Sprouts Specialists', 'Cauliflower Producers', 'Cabbage Growers',
-        'Broccoli Specialists', 'Spinach Producers', 'Lettuce Growers',
-        'Rocket Specialists', 'Kale Producers', 'Chard Growers'
-    ],
+    <!-- PWA -->
+    <meta name="theme-color" content="#2e7d32">
+    <link rel="manifest" href="manifest.json">
     
-    // Telegram Bot Configuration (optional)
-    TELEGRAM_CONFIG: {
-        BOT_TOKEN: 'YOUR_TELEGRAM_BOT_TOKEN',
-        CHAT_ID: 'YOUR_TELEGRAM_CHAT_ID',
-        ENABLED: false
-    },
-    
-    // Telegram Web App Configuration
-    TELEGRAM_WEB_APP: {
-        ENABLED: true,
-        BOT_USERNAME: 'YOUR_BOT_USERNAME', // Например: ukfarmsbot
-        THEME_PARAMS: {
-            bg_color: '#ffffff',
-            text_color: '#000000',
-            hint_color: '#999999',
-            link_color: '#2e7d32',
-            button_color: '#2e7d32',
-            button_text_color: '#ffffff'
-        }
-    },
-    
-    // Application Settings
-    APP_SETTINGS: {
-        MAX_REVIEWS_PER_FARM: 50,
-        REVIEW_FLAG_THRESHOLD: 3,
-        AUTO_HIDE_FLAGGED_REVIEWS: true,
-        ENABLE_GEOLOCATION: true,
-        ENABLE_PULL_TO_REFRESH: false, // Отключено - мешает навигации
-        DEFAULT_THEME: 'light', // Только светлая тема
-        CACHE_DURATION: 300000, // 5 minutes in milliseconds
-        DEBOUNCE_DELAY: 300 // milliseconds for search input
-    },
-    
-    // Advertisement Configuration
-    AD_CONFIG: {
-        COMPANY_NAME: 'White Tax Returns',
-        WEBSITE_URL: 'https://whitetax.site/sng',
-        BANNER_TEXT: 'White Tax Returns — официально зарегистрированное налоговое агентство и бухгалтерский отдел Fruitful Jobs и Agri HR. Верните свои налоги быстро и честно — подайте заявку сейчас.',
-        BUTTON_TEXT: 'Подайте заявку сейчас',
-        REVIEW_TEXT: 'White Tax Returns — официально зарегистрированное налоговое агентство и официальный бухгалтерский отдел операторов Fruitful Jobs и Agri HR. Верните свои налоги быстро и честно — подайте заявку сейчас.'
-    },
-    
-    // API Endpoints
-    API_ENDPOINTS: {
-        ADD_FARM: '/addFarm',
-        GET_FARMS: '/getFarms',
-        ADD_REVIEW: '/addReview',
-        FLAG_REVIEW: '/flagReview',
-        LOGIN: '/login',
-        GEOCODE: '/geocode'
-    },
-    
-    // Error Messages
-    ERROR_MESSAGES: {
-        NETWORK_ERROR: 'Ошибка сети. Проверьте подключение к интернету.',
-        INVALID_POSTCODE: 'Неверный формат почтового индекса UK.',
-        GEOCODING_FAILED: 'Не удалось определить координаты по почтовому индексу.',
-        FORM_VALIDATION: 'Пожалуйста, заполните все обязательные поля.',
-        LOGIN_FAILED: 'Ошибка входа. Проверьте email.',
-        UNAUTHORIZED: 'Необходима авторизация для выполнения этого действия.',
-        SERVER_ERROR: 'Ошибка сервера. Попробуйте позже.',
-        DUPLICATE_REVIEW: 'Вы уже оставляли отзыв для этой фермы.'
-    },
-    
-    // Success Messages
-    SUCCESS_MESSAGES: {
-        FARM_ADDED: 'Ферма успешно добавлена!',
-        REVIEW_ADDED: 'Отзыв успешно добавлен!',
-        LOGIN_SUCCESS: 'Вход выполнен успешно!',
-        REVIEW_FLAGGED: 'Жалоба отправлена. Спасибо за помощь в модерации!',
-        DATA_LOADED: 'Данные загружены успешно!'
-    }
-};
+    <!-- Telegram Web App -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-content">
+            <h1 class="app-title">
+                <span class="material-symbols-outlined">agriculture</span>
+                <span class="title-full">Карта Ферм UK</span>
+                <span class="title-short">Фермы UK</span>
+            </h1>
+            <div class="header-actions">
+                <button class="btn-icon" id="refreshBtn" title="Обновить данные">
+                    <span class="material-symbols-outlined">refresh</span>
+                </button>
+                <button class="btn-icon" id="statsBtn" title="Статистика">
+                    <span class="material-symbols-outlined">analytics</span>
+                </button>
+                <button class="btn-icon hidden" id="installBtn" title="Установить приложение">
+                    <span class="material-symbols-outlined">install_mobile</span>
+                </button>
+                <button class="btn-primary" id="loginHeaderBtn">
+                    <span class="material-symbols-outlined">login</span>
+                    <span class="btn-text-full">Войти</span>
+                    <span class="btn-text-short">Войти</span>
+                </button>
+                <button class="btn-primary" id="addFarmBtn">
+                    <span class="material-symbols-outlined">add</span>
+                    <span class="btn-text-full">Добавить ферму</span>
+                    <span class="btn-text-short">Добавить</span>
+                </button>
+            </div>
+        </div>
+    </header>
 
-// Export for use in other files
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = CONFIG;
-}
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Search and Filter Panel -->
+        <div class="search-panel">
+            <div class="search-container">
+                <div class="search-input-group">
+                    <span class="material-symbols-outlined search-icon">search</span>
+                    <input type="text" id="searchInput" placeholder="Поиск ферм..." class="search-input">
+                    <button class="btn-icon" id="clearSearchBtn" title="Очистить поиск">
+                        <span class="material-symbols-outlined">clear</span>
+                    </button>
+                </div>
+                
+                <div class="filter-controls">
+                    <button class="btn-filter" id="toggleFiltersBtn">
+                        <span class="material-symbols-outlined">tune</span>
+                        Фильтры
+                    </button>
+                    
+                    <div class="active-filters" id="activeFilters">
+                        <!-- Активные фильтры будут отображаться здесь -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Expandable Filters -->
+            <div class="filters-panel hidden" id="filtersPanel">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label for="typeFilter">Тип фермы</label>
+                        <select id="typeFilter" class="filter-select">
+                            <option value="">Все типы</option>
+                            <option value="vegetables">🥬 Овощная ферма</option>
+                            <option value="tomatoes">🍅 Томатная ферма</option>
+                            <option value="berries">🍓 Ягодная ферма</option>
+                            <option value="mushrooms">🍄 Грибная ферма</option>
+                            <option value="flowers">🌷 Цветочная ферма</option>
+                            <option value="apples">🍎 Яблочная ферма</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="operatorFilter">Оператор</label>
+                        <select id="operatorFilter" class="filter-select">
+                            <option value="">Все операторы</option>
+                            <option value="AgriHR">AgriHR</option>
+                            <option value="Concordia">Concordia</option>
+                            <option value="Fruitful Jobs">Fruitful Jobs</option>
+                            <option value="Pro-Force">Pro-Force</option>
+                            <option value="HOPS">HOPS</option>
+                            <option value="Other">Другой</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="filter-actions">
+                    <button class="btn-secondary" id="clearFiltersBtn">Сбросить фильтры</button>
+                    <button class="btn-primary" id="applyFiltersBtn">Применить</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Container -->
+        <div id="map" class="map-container"></div>
+        
+        <!-- Farm Info Panel -->
+        <div id="farmInfoPanel" class="farm-info-panel hidden">
+            <div class="panel-header">
+                <h3 id="farmInfoTitle">Информация о ферме</h3>
+                <button class="btn-icon" id="closePanelBtn">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="panel-content" id="farmInfoContent">
+                <!-- Динамический контент -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Farm Modal -->
+    <div id="addFarmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Добавить новую ферму</h2>
+                <button class="btn-icon" id="closeModalBtn">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form id="addFarmForm" class="modal-body">
+                <div class="form-group">
+                    <label for="farmType">Тип фермы</label>
+                    <select id="farmType" required>
+                        <option value="">Выберите тип фермы</option>
+                        <option value="vegetables">🥬 Овощная ферма</option>
+                        <option value="tomatoes">🍅 Томатная ферма</option>
+                        <option value="berries">🍓 Ягодная ферма</option>
+                        <option value="mushrooms">🍄 Грибная ферма</option>
+                        <option value="flowers">🌷 Цветочная ферма</option>
+                        <option value="apples">🍎 Яблочная ферма</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="farmName">Название фермы</label>
+                    <input type="text" id="farmName" required autocomplete="off">
+                    <div id="farmNameSuggestions" class="suggestions-dropdown"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="farmAddress">Адрес</label>
+                    <input type="text" id="farmAddress" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="farmPostcode">Почтовый индекс (UK Postcode)</label>
+                    <input type="text" id="farmPostcode" required pattern="[A-Z]{1,2}[0-9R][0-9A-Z]? [0-9][A-Z]{2}" placeholder="SW1A 1AA">
+                </div>
+
+                <div class="form-group">
+                    <label for="farmOperator">Оператор</label>
+                    <select id="farmOperator" required>
+                        <option value="">Выберите оператора</option>
+                        <option value="AgriHR">AgriHR</option>
+                        <option value="Concordia">Concordia</option>
+                        <option value="Fruitful Jobs">Fruitful Jobs</option>
+                        <option value="Pro-Force">Pro-Force</option>
+                        <option value="HOPS">HOPS</option>
+                        <option value="Other">Другой</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="farmRating">Рейтинг (1-5 звезд)</label>
+                    <div class="rating-input">
+                        <input type="range" id="farmRating" min="1" max="5" value="3">
+                        <div class="rating-display" id="ratingDisplay">⭐⭐⭐</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="farmComment">Отзыв</label>
+                    <textarea id="farmComment" rows="4" placeholder="Поделитесь своим опытом работы на этой ферме..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="farmEarnings">Общий заработок за контракт/сезон (£)</label>
+                    <input type="number" id="farmEarnings" placeholder="8000" min="0" step="100">
+                    <small>Укажите только сумму в фунтах стерлингов</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="farmDuration">Продолжительность работы</label>
+                    <select id="farmDuration" required>
+                        <option value="">Выберите продолжительность</option>
+                        <option value="1 месяц">1 месяц</option>
+                        <option value="2 месяца">2 месяца</option>
+                        <option value="3 месяца">3 месяца</option>
+                        <option value="4 месяца">4 месяца</option>
+                        <option value="5 месяцев">5 месяцев</option>
+                        <option value="6 месяцев">6 месяцев (полный сезон)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="userEmail">Ваш Gmail</label>
+                    <input type="email" id="userEmail" required placeholder="your.email@gmail.com">
+                    <small>Используется для авторизации и связи</small>
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="cancelBtn">Отмена</button>
+                <button type="submit" form="addFarmForm" class="btn-primary">Добавить ферму</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Review Modal -->
+    <div id="addReviewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Добавить отзыв о ферме</h2>
+                <button class="btn-icon" id="closeReviewModalBtn">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form id="addReviewForm" class="modal-body">
+                <div class="form-group">
+                    <label for="reviewRating">Рейтинг (1-5 звезд)</label>
+                    <div class="rating-input">
+                        <input type="range" id="reviewRating" min="1" max="5" value="3">
+                        <div class="rating-display" id="reviewRatingDisplay">⭐⭐⭐</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="reviewComment">Ваш отзыв</label>
+                    <textarea id="reviewComment" rows="4" required placeholder="Поделитесь своим опытом работы на этой ферме..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="reviewEarnings">Общий заработок за контракт/сезон (£)</label>
+                    <input type="number" id="reviewEarnings" placeholder="8000" min="0" step="100">
+                    <small>Укажите только сумму в фунтах стерлингов</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="reviewDuration">Продолжительность работы</label>
+                    <select id="reviewDuration" required>
+                        <option value="">Выберите продолжительность</option>
+                        <option value="1 месяц">1 месяц</option>
+                        <option value="2 месяца">2 месяца</option>
+                        <option value="3 месяца">3 месяца</option>
+                        <option value="4 месяца">4 месяца</option>
+                        <option value="5 месяцев">5 месяцев</option>
+                        <option value="6 месяцев">6 месяцев (полный сезон)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="reviewEmail">Ваш Gmail</label>
+                    <input type="email" id="reviewEmail" required placeholder="your.email@gmail.com">
+                    <small>Используется для авторизации и связи</small>
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="cancelReviewBtn">Отмена</button>
+                <button type="submit" form="addReviewForm" class="btn-primary">Добавить отзыв</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Вход в систему</h2>
+                <button class="btn-icon" id="closeLoginBtn">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 20px;">
+                        Выберите способ входа в систему:
+                    </p>
+                </div>
+                
+                <!-- Option 1: Login with existing email -->
+                <div class="login-option" style="margin-bottom: 24px; padding: 20px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: 12px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">login</span>
+                        <h3 style="margin: 0; color: var(--md-sys-color-on-surface);">Уже есть аккаунт?</h3>
+                    </div>
+                    <p style="color: var(--md-sys-color-on-surface-variant); font-size: 14px; margin-bottom: 16px;">
+                        Если вы уже добавляли фермы или отзывы, войдите по своему email
+                    </p>
+                    <div class="form-group">
+                        <label for="loginEmail">Ваш Gmail</label>
+                        <input type="email" id="loginEmail" placeholder="your.email@gmail.com">
+                    </div>
+                    <button type="button" class="btn-primary" id="loginBtn" style="width: 100%;">
+                        <span class="material-symbols-outlined">login</span>
+                        Войти
+                    </button>
+                </div>
+                
+                <!-- Option 2: Register by adding review -->
+                <div class="login-option" style="padding: 20px; border: 1px solid var(--md-sys-color-primary); border-radius: 12px; background: linear-gradient(135deg, var(--md-sys-color-primary-container), var(--md-sys-color-surface));">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">add_comment</span>
+                        <h3 style="margin: 0; color: var(--md-sys-color-on-primary-container);">Первый раз здесь?</h3>
+                    </div>
+                    <p style="color: var(--md-sys-color-on-surface-variant); font-size: 14px; margin-bottom: 16px;">
+                        Поделитесь опытом работы на ферме и получите доступ ко всей информации
+                    </p>
+                    <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                        <span style="background: var(--md-sys-color-primary); color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">✨ Мгновенный доступ</span>
+                        <span style="background: var(--md-sys-color-primary); color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">🤝 Помощь сообществу</span>
+                    </div>
+                    <button type="button" class="btn-primary" id="registerByReviewBtn" style="width: 100%; background: var(--md-sys-color-primary);">
+                        <span class="material-symbols-outlined">add</span>
+                        Добавить ферму и получить доступ
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="cancelLoginBtn">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Modal -->
+    <div id="statsModal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2>📊 Статистика ферм</h2>
+                <button class="btn-icon" id="closeStatsBtn">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Фильтры для статистики -->
+                <div class="stats-filters" style="margin-bottom: 24px; padding: 16px; background-color: var(--md-sys-color-surface-variant); border-radius: 12px;">
+                    <h3 style="margin: 0 0 16px 0; color: var(--md-sys-color-on-surface); font-size: 16px;">
+                        <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 8px;">tune</span>
+                        Фильтры статистики
+                    </h3>
+                    <div class="stats-filters-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                        <div class="filter-group">
+                            <label for="statsTypeFilter">Тип фермы</label>
+                            <select id="statsTypeFilter" class="filter-select">
+                                <option value="">Все типы</option>
+                                <option value="vegetables">🥬 Овощная ферма</option>
+                                <option value="tomatoes">🍅 Томатная ферма</option>
+                                <option value="berries">🍓 Ягодная ферма</option>
+                                <option value="mushrooms">🍄 Грибная ферма</option>
+                                <option value="flowers">🌷 Цветочная ферма</option>
+                                <option value="apples">🍎 Яблочная ферма</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="statsOperatorFilter">Оператор</label>
+                            <select id="statsOperatorFilter" class="filter-select">
+                                <option value="">Все операторы</option>
+                                <option value="AgriHR">AgriHR</option>
+                                <option value="Concordia">Concordia</option>
+                                <option value="Fruitful Jobs">Fruitful Jobs</option>
+                                <option value="Pro-Force">Pro-Force</option>
+                                <option value="HOPS">HOPS</option>
+                                <option value="Other">Другой</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="statsSortFilter">Сортировка по заработку</label>
+                            <select id="statsSortFilter" class="filter-select">
+                                <option value="">Без сортировки</option>
+                                <option value="earnings_high_to_low">💰 От высокого к низкому</option>
+                                <option value="earnings_low_to_high">💸 От низкого к высокому</option>
+                                <option value="rating_high_to_low">⭐ По рейтингу (высокий)</option>
+                                <option value="rating_low_to_high">⭐ По рейтингу (низкий)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 16px;">
+                        <button class="btn-secondary" id="clearStatsFiltersBtn">Сбросить</button>
+                        <button class="btn-primary" id="applyStatsFiltersBtn">Применить</button>
+                    </div>
+                </div>
+                
+                <!-- Контент статистики -->
+                <div id="statsContent">
+                    <!-- Динамический контент статистики -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Profile Modal -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>👤 Профиль пользователя</h2>
+                <button class="btn-icon" id="closeProfileBtn">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="modal-body" id="profileContent">
+                <!-- Динамический контент профиля -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Offline Indicator -->
+    <div id="offlineIndicator" class="offline-indicator hidden">
+        <span class="material-symbols-outlined">wifi_off</span>
+        <span>Офлайн режим</span>
+    </div>
+
+    <!-- Update Available Banner -->
+    <div id="updateBanner" class="update-banner hidden">
+        <div class="update-content">
+            <span class="material-symbols-outlined">system_update</span>
+            <span>Доступно обновление приложения</span>
+            <button class="btn-secondary" id="updateBtn">Обновить</button>
+            <button class="btn-icon" id="dismissUpdateBtn">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <!-- Advertisement Banner -->
+    <div class="ad-banner">
+        <div class="ad-content">
+            <div class="ad-header">
+                <div class="ad-label">
+                    <span class="material-symbols-outlined">account_balance</span>
+                    <strong>Реклама</strong>
+                </div>
+            </div>
+            <div class="ad-text">
+                <span class="ad-text-full">
+                    <strong>White Tax Returns</strong> — официально зарегистрированное налоговое агентство и бухгалтерский отдел Fruitful Jobs и Agri HR. Верните свои налоги быстро и честно — 
+                    <a href="https://whitetax.site/sng" target="_blank" class="ad-button-inline">
+                        <span class="material-symbols-outlined">open_in_new</span>
+                        подайте заявку сейчас
+                    </a>.
+                </span>
+                <span class="ad-text-mobile">
+                    <strong>White Tax Returns</strong> — Верните налоги быстро и честно — 
+                    <a href="https://whitetax.site/sng" target="_blank" class="ad-button-inline">
+                        <span class="material-symbols-outlined">open_in_new</span>
+                        подайте заявку сейчас
+                    </a>!
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+    
+    <!-- PWA Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
