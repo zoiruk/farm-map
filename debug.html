@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - UK Farms Map</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #2e7d32;
+        }
+        button {
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #1b5e20;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+        }
+        .error {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        .info {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 UK Farms Map - Debug Panel</h1>
+        <p>Панель отладки для тестирования функций приложения</p>
+
+        <!-- API Configuration Test -->
+        <div class="test-section">
+            <h3>🔧 Конфигурация API</h3>
+            <p>Проверка подключения к Google Apps Script и внешним API</p>
+            <button onclick="testGoogleScript()">Тест Google Apps Script</button>
+            <button onclick="testPostcodesAPI()">Тест Postcodes.io API</button>
+            <div id="apiResult" class="result"></div>
+        </div>
+
+        <!-- Postcode Geocoding Test -->
+        <div class="test-section">
+            <h3>📍 Тест геокодирования</h3>
+            <div class="form-group">
+                <label for="testPostcode">UK Postcode:</label>
+                <input type="text" id="testPostcode" value="SW1A 1AA" placeholder="Введите UK postcode">
+            </div>
+            <button onclick="testGeocoding()">Геокодировать</button>
+            <div id="geocodeResult" class="result"></div>
+        </div>
+
+        <!-- Farm Data Test -->
+        <div class="test-section">
+            <h3>🏭 Тест данных ферм</h3>
+            <button onclick="testLoadFarms()">Загрузить фермы</button>
+            <button onclick="testAddFarm()">Добавить тестовую ферму</button>
+            <div id="farmResult" class="result"></div>
+        </div>
+
+        <!-- Theme Test -->
+        <div class="test-section">
+            <h3>🎨 Тест тем</h3>
+            <button onclick="testLightTheme()">Светлая тема</button>
+            <button onclick="testDarkTheme()">Темная тема</button>
+            <button onclick="testAutoTheme()">Авто тема</button>
+            <div id="themeResult" class="result"></div>
+        </div>
+
+        <!-- Notification Test -->
+        <div class="test-section">
+            <h3>🔔 Тест уведомлений</h3>
+            <button onclick="testSuccessNotification()">Успех</button>
+            <button onclick="testErrorNotification()">Ошибка</button>
+            <button onclick="testInfoNotification()">Информация</button>
+            <div id="notificationResult" class="result"></div>
+        </div>
+
+        <!-- Local Storage Test -->
+        <div class="test-section">
+            <h3>💾 Тест локального хранилища</h3>
+            <button onclick="testLocalStorage()">Тест localStorage</button>
+            <button onclick="clearLocalStorage()">Очистить localStorage</button>
+            <div id="storageResult" class="result"></div>
+        </div>
+
+        <!-- Farm Name Autocomplete Test -->
+        <div class="test-section">
+            <h3>🔍 Тест автодополнения</h3>
+            <div class="form-group">
+                <label for="testFarmName">Название фермы:</label>
+                <input type="text" id="testFarmName" placeholder="Начните вводить название фермы">
+            </div>
+            <button onclick="testAutocomplete()">Тест автодополнения</button>
+            <div id="autocompleteResult" class="result"></div>
+        </div>
+
+        <!-- Performance Test -->
+        <div class="test-section">
+            <h3>⚡ Тест производительности</h3>
+            <button onclick="testPerformance()">Запустить тесты</button>
+            <div id="performanceResult" class="result"></div>
+        </div>
+    </div>
+
+    <!-- Include main app files for testing -->
+    <script src="config.js"></script>
+    
+    <script>
+        // Debug functions
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `result ${type}`;
+        }
+
+        async function testGoogleScript() {
+            showResult('apiResult', 'Тестирование подключения к Google Apps Script...', 'info');
+            
+            try {
+                const response = await fetch(CONFIG.GOOGLE_SCRIPT_URL + '?action=GET_FARMS');
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult('apiResult', `✅ Google Apps Script работает!\nПолучено ферм: ${data.data?.length || 0}`, 'success');
+                } else {
+                    showResult('apiResult', `❌ Ошибка Google Apps Script: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult('apiResult', `❌ Ошибка подключения: ${error.message}`, 'error');
+            }
+        }
+
+        async function testPostcodesAPI() {
+            showResult('apiResult', 'Тестирование Postcodes.io API...', 'info');
+            
+            try {
+                const response = await fetch('https://api.postcodes.io/postcodes/SW1A1AA');
+                const data = await response.json();
+                
+                if (data.status === 200) {
+                    showResult('apiResult', `✅ Postcodes.io API работает!\nКоординаты: ${data.result.latitude}, ${data.result.longitude}`, 'success');
+                } else {
+                    showResult('apiResult', `❌ Ошибка Postcodes.io: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult('apiResult', `❌ Ошибка подключения к Postcodes.io: ${error.message}`, 'error');
+            }
+        }
+
+        async function testGeocoding() {
+            const postcode = document.getElementById('testPostcode').value;
+            if (!postcode) {
+                showResult('geocodeResult', '❌ Введите почтовый индекс', 'error');
+                return;
+            }
+
+            showResult('geocodeResult', `Геокодирование ${postcode}...`, 'info');
+            
+            try {
+                const response = await fetch(`https://api.postcodes.io/postcodes/${encodeURIComponent(postcode)}`);
+                const data = await response.json();
+                
+                if (data.status === 200) {
+                    const result = `✅ Успешно геокодировано!
+Почтовый индекс: ${data.result.postcode}
+Координаты: ${data.result.latitude}, ${data.result.longitude}
+Регион: ${data.result.region}
+Страна: ${data.result.country}`;
+                    showResult('geocodeResult', result, 'success');
+                } else {
+                    showResult('geocodeResult', `❌ Не удалось геокодировать: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult('geocodeResult', `❌ Ошибка геокодирования: ${error.message}`, 'error');
+            }
+        }
+
+        async function testLoadFarms() {
+            showResult('farmResult', 'Загрузка ферм...', 'info');
+            
+            try {
+                // Test with demo data first
+                const demoFarms = [
+                    { name: 'Test Farm 1', type: 'vegetables', lat: 52.3980, lng: 0.2620 },
+                    { name: 'Test Farm 2', type: 'berries', lat: 51.2704, lng: 0.5227 }
+                ];
+                
+                showResult('farmResult', `✅ Демо данные загружены!\nКоличество ферм: ${demoFarms.length}`, 'success');
+            } catch (error) {
+                showResult('farmResult', `❌ Ошибка загрузки: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAddFarm() {
+            showResult('farmResult', 'Тестирование добавления фермы...', 'info');
+            
+            const testFarm = {
+                farmType: 'vegetables',
+                farmName: 'Test Farm Debug',
+                farmAddress: 'Test Address, London',
+                farmPostcode: 'SW1A 1AA',
+                farmOperator: 'AgriHR',
+                farmRating: 4,
+                farmComment: 'Test comment from debug panel',
+                userEmail: 'test@gmail.com'
+            };
+            
+            try {
+                // Simulate API call
+                showResult('farmResult', `✅ Тестовая ферма готова к добавлению!
+Данные: ${JSON.stringify(testFarm, null, 2)}`, 'success');
+            } catch (error) {
+                showResult('farmResult', `❌ Ошибка: ${error.message}`, 'error');
+            }
+        }
+
+        function testLightTheme() {
+            document.documentElement.setAttribute('data-theme', 'light');
+            showResult('themeResult', '✅ Светлая тема активирована', 'success');
+        }
+
+        function testDarkTheme() {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            showResult('themeResult', '✅ Темная тема активирована', 'success');
+        }
+
+        function testAutoTheme() {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = prefersDark ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+            showResult('themeResult', `✅ Авто тема: ${theme}`, 'success');
+        }
+
+        function testSuccessNotification() {
+            showResult('notificationResult', '✅ Тест уведомления об успехе', 'success');
+        }
+
+        function testErrorNotification() {
+            showResult('notificationResult', '❌ Тест уведомления об ошибке', 'error');
+        }
+
+        function testInfoNotification() {
+            showResult('notificationResult', 'ℹ️ Тест информационного уведомления', 'info');
+        }
+
+        function testLocalStorage() {
+            try {
+                // Test localStorage functionality
+                localStorage.setItem('test_key', 'test_value');
+                const value = localStorage.getItem('test_key');
+                
+                if (value === 'test_value') {
+                    showResult('storageResult', '✅ localStorage работает корректно', 'success');
+                } else {
+                    showResult('storageResult', '❌ localStorage не работает', 'error');
+                }
+            } catch (error) {
+                showResult('storageResult', `❌ Ошибка localStorage: ${error.message}`, 'error');
+            }
+        }
+
+        function clearLocalStorage() {
+            try {
+                localStorage.clear();
+                showResult('storageResult', '✅ localStorage очищен', 'success');
+            } catch (error) {
+                showResult('storageResult', `❌ Ошибка очистки: ${error.message}`, 'error');
+            }
+        }
+
+        function testAutocomplete() {
+            const input = document.getElementById('testFarmName').value;
+            
+            if (!input || input.length < 2) {
+                showResult('autocompleteResult', '❌ Введите минимум 2 символа', 'error');
+                return;
+            }
+            
+            const matches = CONFIG.FAMOUS_FARMS.filter(farm => 
+                farm.toLowerCase().includes(input.toLowerCase())
+            ).slice(0, 10);
+            
+            if (matches.length > 0) {
+                showResult('autocompleteResult', `✅ Найдено совпадений: ${matches.length}\n${matches.join('\n')}`, 'success');
+            } else {
+                showResult('autocompleteResult', '❌ Совпадений не найдено', 'error');
+            }
+        }
+
+        function testPerformance() {
+            showResult('performanceResult', 'Запуск тестов производительности...', 'info');
+            
+            const startTime = performance.now();
+            
+            // Test 1: Farm filtering
+            const filterStart = performance.now();
+            const testQuery = 'farm';
+            const matches = CONFIG.FAMOUS_FARMS.filter(farm => 
+                farm.toLowerCase().includes(testQuery.toLowerCase())
+            );
+            const filterTime = performance.now() - filterStart;
+            
+            // Test 2: DOM manipulation
+            const domStart = performance.now();
+            for (let i = 0; i < 100; i++) {
+                const div = document.createElement('div');
+                div.textContent = `Test ${i}`;
+            }
+            const domTime = performance.now() - domStart;
+            
+            const totalTime = performance.now() - startTime;
+            
+            const result = `✅ Тесты производительности завершены!
+Фильтрация ферм (${matches.length} результатов): ${filterTime.toFixed(2)}ms
+DOM операции (100 элементов): ${domTime.toFixed(2)}ms
+Общее время: ${totalTime.toFixed(2)}ms`;
+            
+            showResult('performanceResult', result, 'success');
+        }
+
+        // Initialize autocomplete test
+        document.getElementById('testFarmName').addEventListener('input', function() {
+            const value = this.value;
+            if (value.length >= 2) {
+                testAutocomplete();
+            }
+        });
+
+        // Show initial info
+        showResult('apiResult', 'Готов к тестированию API', 'info');
+        showResult('geocodeResult', 'Введите UK postcode для тестирования', 'info');
+        showResult('farmResult', 'Готов к тестированию ферм', 'info');
+        showResult('themeResult', 'Выберите тему для тестирования', 'info');
+        showResult('notificationResult', 'Нажмите кнопку для тестирования уведомлений', 'info');
+        showResult('storageResult', 'Готов к тестированию localStorage', 'info');
+        showResult('autocompleteResult', 'Начните вводить название фермы', 'info');
+        showResult('performanceResult', 'Готов к тестированию производительности', 'info');
+    </script>
+</body>
+</html>
