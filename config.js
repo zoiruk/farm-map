@@ -160,6 +160,7 @@ const CONFIG = {
         REVIEW_FLAG_THRESHOLD: 3,
         AUTO_HIDE_FLAGGED_REVIEWS: true,
         ENABLE_GEOLOCATION: true,
+        ENABLE_PULL_TO_REFRESH: false, // Отключено - мешает навигации
         DEFAULT_THEME: 'light', // Только светлая тема
         CACHE_DURATION: 300000, // 5 minutes in milliseconds
         DEBOUNCE_DELAY: 300 // milliseconds for search input
