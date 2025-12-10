@@ -378,23 +378,64 @@ body {
 
 /* Farm Info Panel */
 .farm-info-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.farm-info-panel:not(.hidden) {
+  pointer-events: auto;
+}
+
+.farm-info-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.farm-info-panel:not(.hidden) .farm-info-backdrop {
+  opacity: 1;
+}
+
+.farm-info-card {
   position: absolute;
   top: 20px;
   right: 20px;
   width: 350px;
-  max-height: calc(100vh - 180px); /* Увеличен отступ снизу для рекламы */
+  max-height: calc(100vh - 180px);
   background-color: var(--md-sys-color-surface);
   border-radius: 16px;
   box-shadow: var(--md-sys-elevation-level3);
   overflow: hidden;
-  z-index: 1000;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+}
+
+.farm-info-panel:not(.hidden) .farm-info-card {
+  transform: translateX(0);
 }
 
 .farm-info-panel.hidden {
-  transform: translateX(100%);
   opacity: 0;
   pointer-events: none;
+}
+
+.farm-info-panel.hidden .farm-info-card {
+  transform: translateX(100%);
+}
+
+.farm-info-panel.hidden .farm-info-backdrop {
+  opacity: 0;
 }
 
 .panel-header {
@@ -929,11 +970,12 @@ body {
     flex-shrink: 0; /* Не сжимается */
   }
   
-  .farm-info-panel {
-    width: calc(100% - 40px);
-    right: 20px;
-    left: 20px;
-    max-height: calc(100vh - 160px); /* Уменьшенный отступ для компактного баннера */
+  .farm-info-card {
+    width: calc(100% - 20px);
+    right: 10px;
+    left: 10px;
+    max-height: 70vh;
+    top: 15vh;
   }
   
   .modal-content {
@@ -1824,11 +1866,22 @@ body {
 }
 
 .telegram-web-app .app-header {
+  min-height: 60px !important;
+  padding: 8px 16px !important;
+}
+
+.telegram-web-app .app-header h1 {
   display: none !important;
 }
 
+.telegram-web-app .header-actions {
+  justify-content: center !important;
+  width: 100% !important;
+  gap: 12px !important;
+}
+
 .telegram-web-app .main-content {
-  height: 100vh !important;
+  height: calc(100vh - 60px) !important;
   padding-bottom: 60px !important;
 }
 
@@ -1838,12 +1891,12 @@ body {
   z-index: 1001;
 }
 
-.telegram-web-app .farm-info-panel {
-  top: 10px;
+.telegram-web-app .farm-info-card {
+  top: 10vh;
   right: 10px;
   left: 10px;
   width: auto;
-  max-height: calc(100vh - 80px);
+  max-height: 80vh;
 }
 
 .telegram-web-app .modal-content {
@@ -1896,11 +1949,11 @@ body {
 
 /* Mobile optimizations for Telegram */
 @media (max-width: 768px) {
-  .telegram-web-app .farm-info-panel {
-    top: 5px;
+  .telegram-web-app .farm-info-card {
+    top: 5vh;
     right: 5px;
     left: 5px;
-    max-height: calc(100vh - 70px);
+    max-height: 85vh;
   }
   
   .telegram-web-app .modal-content {
