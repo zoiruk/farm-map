@@ -1,1148 +1,238 @@
-/* Material Design 3 - Farm Map */
-
-:root {
-    /* MD3 Color Tokens - Light Theme */
-    --md-sys-color-primary: #2e7d32;
-    --md-sys-color-on-primary: #ffffff;
-    --md-sys-color-primary-container: #a5d6a7;
-    --md-sys-color-on-primary-container: #1b5e20;
-    
-    --md-sys-color-secondary: #5d7f5e;
-    --md-sys-color-on-secondary: #ffffff;
-    --md-sys-color-secondary-container: #e0f2e1;
-    --md-sys-color-on-secondary-container: #1a3a1c;
-    
-    --md-sys-color-surface: #fef7ff;
-    --md-sys-color-surface-variant: #e7e0ec;
-    --md-sys-color-on-surface: #1d1b20;
-    --md-sys-color-on-surface-variant: #49454f;
-    
-    --md-sys-color-background: #fffbfe;
-    --md-sys-color-on-background: #1d1b20;
-    
-    --md-sys-color-error: #ba1a1a;
-    --md-sys-color-on-error: #ffffff;
-    
-    --md-sys-color-outline: #79747e;
-    --md-sys-color-outline-variant: #cac4d0;
-    
-    /* Elevation */
-    --md-sys-elevation-1: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
-    --md-sys-elevation-2: 0 1px 2px rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15);
-    --md-sys-elevation-3: 0 4px 8px 3px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.3);
-    
-    /* Shape */
-    --md-sys-shape-corner-extra-small: 4px;
-    --md-sys-shape-corner-small: 8px;
-    --md-sys-shape-corner-medium: 12px;
-    --md-sys-shape-corner-large: 16px;
-    --md-sys-shape-corner-extra-large: 28px;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: var(--md-sys-color-background);
-    color: var(--md-sys-color-on-background);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-#app {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-}
-
-/* Header */
-header {
-    background: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
-    padding: 16px 24px;
-    box-shadow: var(--md-sys-elevation-2);
-    z-index: 100;
-}
-
-.header-content {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.header-title {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
-}
-
-.header-icon {
-    font-size: 32px;
-}
-
-header h1 {
-    font-size: 28px;
-    font-weight: 500;
-    letter-spacing: 0;
-}
-
-.header-buttons {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    align-items: center;
-}
-
-/* User Info */
-#userInfo {
-    display: none;
-    align-items: center;
-    gap: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 8px 16px;
-    border-radius: var(--md-sys-shape-corner-extra-large);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-#userEmail {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--md-sys-color-on-primary);
-}
-
-#logoutBtn {
-    background: transparent;
-    border: none;
-    color: var(--md-sys-color-on-primary);
-    padding: 4px;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-#logoutBtn:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-#logoutBtn .material-symbols-outlined {
-    font-size: 20px;
-}
-
-/* Material Design 3 Buttons */
-.md-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 24px;
-    border: none;
-    border-radius: var(--md-sys-shape-corner-extra-large);
-    font-family: 'Roboto', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    letter-spacing: 0.1px;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
-    position: relative;
-    overflow: hidden;
-}
-
-.md-button .material-symbols-outlined {
-    font-size: 18px;
-}
-
-.md-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: currentColor;
-    opacity: 0;
-    transition: opacity 0.2s;
-}
-
-.md-button:hover::before {
-    opacity: 0.08;
-}
-
-.md-button:active::before {
-    opacity: 0.12;
-}
-
-.md-filled-button {
-    background: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
-    box-shadow: var(--md-sys-elevation-1);
-}
-
-.md-filled-button:hover {
-    box-shadow: var(--md-sys-elevation-2);
-}
-
-.md-outlined-button {
-    background: transparent;
-    color: var(--md-sys-color-on-primary);
-    border: 1px solid currentColor;
-}
-
-/* Text Button */
-.md-text-button {
-    background: transparent;
-    color: var(--md-sys-color-primary);
-    border: none;
-    padding: 8px 12px;
-}
-
-.md-text-button:hover {
-    background: rgba(46, 125, 50, 0.08);
-}
-
-/* Button variants for different contexts */
-.md-button.surface-variant {
-    background: var(--md-sys-color-surface-variant);
-    color: var(--md-sys-color-on-surface-variant);
-}
-
-.md-button.error {
-    background: var(--md-sys-color-error);
-    color: var(--md-sys-color-on-error);
-}
-
-.md-button.secondary {
-    background: var(--md-sys-color-secondary);
-    color: var(--md-sys-color-on-secondary);
-}
-
-.full-width {
-    width: 100%;
-    justify-content: center;
-}
-
-/* Map */
-#map {
-    flex: 1;
-    width: 100%;
-    position: relative;
-    margin-bottom: 60px; /* Отступ для баннера */
-}
-
-/* Modal */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    overflow: auto;
-    animation: fadeIn 0.2s;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.modal-content {
-    background: var(--md-sys-color-surface);
-    margin: 40px auto;
-    border-radius: var(--md-sys-shape-corner-extra-large);
-    width: 90%;
-    max-width: 500px;
-    box-shadow: var(--md-sys-elevation-3);
-    animation: slideUp 0.3s cubic-bezier(0.2, 0, 0, 1);
-}
-
-.modal-content.large {
-    max-width: 600px;
-}
-
-@keyframes slideUp {
-    from {
-        transform: translateY(20px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-/* Loading State */
-.loading {
-    position: relative;
-    pointer-events: none;
-    opacity: 0.6;
-}
-
-.loading::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 20px;
-    height: 20px;
-    margin: -10px 0 0 -10px;
-    border: 2px solid transparent;
-    border-top: 2px solid currentColor;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Focus States */
-.md-button:focus-visible {
-    outline: 2px solid var(--md-sys-color-primary);
-    outline-offset: 2px;
-}
-
-.md-text-field input:focus-visible,
-.md-text-field textarea:focus-visible,
-.md-select select:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 2px var(--md-sys-color-primary);
-}
-
-/* Ripple Effect */
-.md-button {
-    position: relative;
-    overflow: hidden;
-}
-
-.md-button::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    transform: translate(-50%, -50%);
-    transition: width 0.3s, height 0.3s;
-}
-
-.md-button:active::after {
-    width: 300px;
-    height: 300px;
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 24px 24px 16px;
-}
-
-.modal-header h2 {
-    font-size: 28px;
-    font-weight: 400;
-    color: var(--md-sys-color-on-surface);
-}
-
-.close-btn {
-    background: transparent;
-    border: none;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--md-sys-color-on-surface-variant);
-    transition: background 0.2s;
-}
-
-.close-btn:hover {
-    background: rgba(0, 0, 0, 0.08);
-}
-
-.close-btn .material-symbols-outlined {
-    font-size: 24px;
-}
-
-.modal-body {
-    padding: 0 24px 24px;
-}
-
-/* Auth Modal Specific Styles */
-.auth-icon {
-    font-size: 64px;
-    color: var(--md-sys-color-primary);
-    margin-bottom: 16px;
-}
-
-.auth-title {
-    font-size: 24px;
-    font-weight: 400;
-    color: var(--md-sys-color-on-surface);
-    margin-bottom: 8px;
-}
-
-.auth-description {
-    color: var(--md-sys-color-on-surface-variant);
-    font-size: 16px;
-    line-height: 1.5;
-    margin-bottom: 24px;
-}
-
-.auth-divider {
-    text-align: center;
-    margin: 24px 0;
-    color: var(--md-sys-color-outline);
-    font-size: 14px;
-    position: relative;
-}
-
-.auth-divider::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: var(--md-sys-color-outline-variant);
-    z-index: 1;
-}
-
-.auth-divider span {
-    background: var(--md-sys-color-surface);
-    padding: 0 16px;
-    position: relative;
-    z-index: 2;
-}
-
-.auth-note {
-    font-size: 12px;
-    color: var(--md-sys-color-on-surface-variant);
-    text-align: center;
-    margin-top: 16px;
-    line-height: 1.4;
-}
-
-/* Material Design 3 Text Fields */
-.md-text-field {
-    position: relative;
-    margin-bottom: 20px;
-}
-
-.md-text-field input,
-.md-text-field textarea {
-    width: 100%;
-    padding: 16px 16px 8px;
-    border: 1px solid var(--md-sys-color-outline);
-    border-radius: var(--md-sys-shape-corner-extra-small);
-    font-family: 'Roboto', sans-serif;
-    font-size: 16px;
-    color: var(--md-sys-color-on-surface);
-    background: transparent;
-    transition: all 0.2s;
-    outline: none;
-}
-
-.md-text-field textarea {
-    resize: vertical;
-    min-height: 80px;
-}
-
-.md-text-field input:focus,
-.md-text-field textarea:focus {
-    border-color: var(--md-sys-color-primary);
-    border-width: 2px;
-    padding: 15px 15px 7px;
-}
-
-.md-text-field label {
-    position: absolute;
-    left: 16px;
-    top: 16px;
-    font-size: 16px;
-    color: var(--md-sys-color-on-surface-variant);
-    pointer-events: none;
-    transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
-    background: var(--md-sys-color-surface);
-    padding: 0 4px;
-}
-
-.md-text-field input:focus + label,
-.md-text-field input:not(:placeholder-shown) + label,
-.md-text-field textarea:focus + label,
-.md-text-field textarea:not(:placeholder-shown) + label {
-    top: -8px;
-    left: 12px;
-    font-size: 12px;
-    color: var(--md-sys-color-primary);
-}
-
-/* Autocomplete wrapper */
-.autocomplete-wrapper {
-    position: relative;
-}
-
-/* Список подсказок */
-.suggestions-list {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: var(--md-sys-color-surface);
-    border: 1px solid var(--md-sys-color-outline);
-    border-radius: var(--md-sys-shape-corner-small);
-    box-shadow: var(--md-sys-elevation-2);
-    max-height: 240px;
-    overflow-y: auto;
-    z-index: 1000;
-    margin-top: 4px;
-}
-
-/* Элемент подсказки */
-.suggestion-item {
-    padding: 12px 16px;
-    cursor: pointer;
-    transition: background 0.2s;
-    font-size: 16px;
-    color: var(--md-sys-color-on-surface);
-    border-bottom: 1px solid var(--md-sys-color-outline-variant);
-}
-
-.suggestion-item:last-child {
-    border-bottom: none;
-}
-
-.suggestion-item:hover {
-    background: var(--md-sys-color-primary-container);
-    color: var(--md-sys-color-on-primary-container);
-}
-
-.suggestion-item:active {
-    background: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
-}
-
-/* Скроллбар для списка подсказок */
-.suggestions-list::-webkit-scrollbar {
-    width: 8px;
-}
-
-.suggestions-list::-webkit-scrollbar-track {
-    background: var(--md-sys-color-surface-variant);
-    border-radius: 4px;
-}
-
-.suggestions-list::-webkit-scrollbar-thumb {
-    background: var(--md-sys-color-outline);
-    border-radius: 4px;
-}
-
-.suggestions-list::-webkit-scrollbar-thumb:hover {
-    background: var(--md-sys-color-on-surface-variant);
-}
-
-/* Select */
-.md-select {
-    position: relative;
-    margin-bottom: 20px;
-}
-
-.md-select select {
-    width: 100%;
-    padding: 16px 16px 8px;
-    border: 1px solid var(--md-sys-color-outline);
-    border-radius: var(--md-sys-shape-corner-extra-small);
-    font-family: 'Roboto', sans-serif;
-    font-size: 16px;
-    color: var(--md-sys-color-on-surface);
-    background: var(--md-sys-color-surface);
-    cursor: pointer;
-    outline: none;
-}
-
-.md-select select:focus {
-    border-color: var(--md-sys-color-primary);
-    border-width: 2px;
-}
-
-.md-select label {
-    position: absolute;
-    left: 12px;
-    top: -8px;
-    font-size: 12px;
-    color: var(--md-sys-color-on-surface-variant);
-    background: var(--md-sys-color-surface);
-    padding: 0 4px;
-}
-
-/* Rating */
-.rating-section {
-    margin-bottom: 24px;
-}
-
-.rating-label {
-    display: block;
-    font-size: 14px;
-    color: var(--md-sys-color-on-surface-variant);
-    margin-bottom: 12px;
-}
-
-.md-rating {
-    display: flex;
-    gap: 4px;
-}
-
-.star-btn {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 50%;
-    transition: all 0.2s;
-    color: var(--md-sys-color-outline);
-}
-
-.star-btn:hover {
-    background: rgba(0, 0, 0, 0.08);
-}
-
-.star-btn.active {
-    color: #ffc107;
-}
-
-.star-btn .material-symbols-outlined {
-    font-size: 32px;
-    font-variation-settings: 'FILL' 0;
-}
-
-.star-btn.active .material-symbols-outlined {
-    font-variation-settings: 'FILL' 1;
-}
-
-/* Form Row */
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-}
-
-/* Success Card */
-.md-card {
-    background: var(--md-sys-color-primary-container);
-    color: var(--md-sys-color-on-primary-container);
-    padding: 24px;
-    border-radius: var(--md-sys-shape-corner-large);
-    margin-top: 24px;
-    text-align: center;
-}
-
-.success-icon {
-    font-size: 48px;
-    color: var(--md-sys-color-primary);
-    margin-bottom: 16px;
-}
-
-.success-card h3 {
-    font-size: 22px;
-    font-weight: 500;
-    margin-bottom: 16px;
-}
-
-.code-display {
-    font-size: 24px;
-    font-weight: 700;
-    font-family: 'Roboto Mono', monospace;
-    color: var(--md-sys-color-primary);
-    margin: 16px 0;
-    padding: 16px;
-    background: var(--md-sys-color-surface);
-    border-radius: var(--md-sys-shape-corner-medium);
-    letter-spacing: 2px;
-}
-
-.code-info {
-    font-size: 14px;
-    color: var(--md-sys-color-on-primary-container);
-    opacity: 0.8;
-}
-
-/* Farm Info */
-#farmInfo h2 {
-    font-size: 32px;
-    font-weight: 400;
-    color: var(--md-sys-color-on-surface);
-    margin-bottom: 16px;
-}
-
-#farmInfo p {
-    margin: 8px 0;
-    font-size: 16px;
-    color: var(--md-sys-color-on-surface-variant);
-}
-
-#farmInfo strong {
-    color: var(--md-sys-color-on-surface);
-}
-
-.rating-display {
-    font-size: 24px;
-    color: #ffc107;
-    margin: 12px 0;
-}
-
-.operators {
-    margin: 16px 0;
-}
-
-.operator-tag {
-    display: inline-flex;
-    align-items: center;
-    background: var(--md-sys-color-secondary-container);
-    color: var(--md-sys-color-on-secondary-container);
-    padding: 6px 16px;
-    border-radius: var(--md-sys-shape-corner-small);
-    margin: 4px;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.comments {
-    margin-top: 24px;
-}
-
-.comments h3 {
-    font-size: 22px;
-    font-weight: 500;
-    color: var(--md-sys-color-on-surface);
-    margin-bottom: 16px;
-}
-
-.comment {
-    background: var(--md-sys-color-surface-variant);
-    padding: 16px;
-    border-radius: var(--md-sys-shape-corner-medium);
-    margin: 12px 0;
-}
-
-.comment-rating {
-    color: #ffc107;
-    font-size: 18px;
-    margin-bottom: 8px;
-}
-
-.comment p {
-    color: var(--md-sys-color-on-surface);
-    line-height: 1.5;
-}
-
-/* Спорный отзыв */
-.comment.suspicious-review {
-    border: 2px solid #ff9800;
-    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-}
-
-.warning-badge {
-    display: inline-block;
-    background: #ff9800;
-    color: white;
-    padding: 6px 12px;
-    border-radius: var(--md-sys-shape-corner-small);
-    font-size: 12px;
-    font-weight: 500;
-    margin-bottom: 12px;
-}
-
-/* Действия с отзывом */
-.review-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.report-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: transparent;
-    border: 1px solid var(--md-sys-color-outline);
-    color: var(--md-sys-color-on-surface-variant);
-    padding: 6px 16px;
-    border-radius: var(--md-sys-shape-corner-extra-large);
-    font-size: 13px;
-    font-family: 'Roboto', sans-serif;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.report-btn:hover {
-    background: rgba(0, 0, 0, 0.05);
-    border-color: var(--md-sys-color-on-surface);
-}
-
-.report-btn .material-symbols-outlined {
-    font-size: 18px;
-}
-
-.flag-count {
-    color: #f44336;
-    font-size: 13px;
-    font-weight: 500;
-}
-
-/* Promo Comment - White Tax Returns */
-.promo-comment {
-    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-    border: 2px solid var(--md-sys-color-primary);
-    padding: 20px;
-    margin-bottom: 20px;
-    position: relative;
-    overflow: hidden;
-}
-
-.promo-comment::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
-    pointer-events: none;
-}
-
-.promo-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
-}
-
-.promo-icon {
-    font-size: 32px;
-    color: var(--md-sys-color-primary);
-    font-variation-settings: 'FILL' 1;
-}
-
-.promo-header strong {
-    font-size: 18px;
-    color: var(--md-sys-color-primary);
-}
-
-.promo-comment p {
-    margin: 8px 0;
-    color: var(--md-sys-color-on-surface);
-    font-size: 15px;
-    line-height: 1.6;
-}
-
-.promo-comment strong {
-    color: var(--md-sys-color-primary);
-    font-weight: 600;
-}
-
-.promo-comment a {
-    color: var(--md-sys-color-primary);
-    text-decoration: none;
-    font-weight: 600;
-    border-bottom: 2px solid var(--md-sys-color-primary);
-    transition: all 0.2s;
-}
-
-.promo-comment a:hover {
-    background: var(--md-sys-color-primary);
-    color: white;
-    padding: 2px 6px;
-    border-radius: 4px;
-}
-
-/* Promo Banner - White Tax Returns */
-.promo-banner {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, #1b5e20 100%);
-    color: white;
-    padding: 12px 16px;
-    box-shadow: 0 -4px 12px rgba(0,0,0,0.2);
-    z-index: 500;
-    animation: slideInUp 0.5s ease-out;
-}
-
-@keyframes slideInUp {
-    from {
-        transform: translateY(100%);
-    }
-    to {
-        transform: translateY(0);
-    }
-}
-
-.promo-banner-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
-}
-
-.promo-banner .material-symbols-outlined {
-    font-size: 32px;
-    font-variation-settings: 'FILL' 1;
-}
-
-.promo-text {
-    flex: 1;
-    min-width: 200px;
-}
-
-.promo-text strong {
-    font-size: 16px;
-    display: block;
-    margin-bottom: 4px;
-}
-
-.promo-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: white;
-    color: var(--md-sys-color-primary);
-    padding: 10px 20px;
-    border-radius: var(--md-sys-shape-corner-extra-large);
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s;
-    box-shadow: var(--md-sys-elevation-1);
-}
-
-.promo-link:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--md-sys-elevation-2);
-}
-
-.promo-link .material-symbols-outlined {
-    font-size: 20px;
-}
-
-/* Emoji Markers */
-.emoji-marker {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.emoji-marker:hover {
-    transform: scale(1.2);
-}
-
-/* Farm Tooltip */
-.farm-tooltip {
-    background: white;
-    border: 2px solid var(--md-sys-color-primary);
-    border-radius: var(--md-sys-shape-corner-small);
-    padding: 8px 12px;
-    font-family: 'Roboto', sans-serif;
-    box-shadow: var(--md-sys-elevation-2);
-    text-align: center;
-}
-
-.farm-tooltip small {
-    color: var(--md-sys-color-on-surface-variant);
-    font-size: 12px;
-}
-
-/* Leaflet Popup Customization */
-.leaflet-popup-content-wrapper {
-    border-radius: var(--md-sys-shape-corner-medium);
-    box-shadow: var(--md-sys-elevation-2);
-}
-
-.leaflet-popup-content {
-    font-family: 'Roboto', sans-serif;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    header {
-        padding: 12px 16px;
-    }
-    
-    .header-title {
-        margin-bottom: 12px;
-    }
-    
-    .header-icon {
-        font-size: 28px;
-    }
-    
-    header h1 {
-        font-size: 20px;
-    }
-    
-    .header-buttons {
-        flex-direction: column;
-    }
-    
-    .md-button {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .modal-content {
-        width: 95%;
-        margin: 20px auto;
-        border-radius: var(--md-sys-shape-corner-large);
-    }
-    
-    .modal-header,
-    .modal-body {
-        padding: 16px;
-    }
-    
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-    
-    /* Promo Banner Mobile */
-    .promo-banner {
-        padding: 10px 12px;
-    }
-    
-    .promo-banner-content {
-        gap: 12px;
-    }
-    
-    .promo-banner .material-symbols-outlined {
-        font-size: 24px;
-    }
-    
-    .promo-text {
-        font-size: 14px;
-    }
-    
-    .promo-text strong {
-        font-size: 14px;
-    }
-    
-    .promo-link {
-        padding: 8px 16px;
-        font-size: 14px;
-    }
-    
-    #map {
-        margin-bottom: 80px;
-    }
-}
-
-/* Dark Theme Support */
-@media (prefers-color-scheme: dark) {
-    :root {
-        /* MD3 Color Tokens - Dark Theme */
-        --md-sys-color-primary: #81c784;
-        --md-sys-color-on-primary: #003910;
-        --md-sys-color-primary-container: #00531a;
-        --md-sys-color-on-primary-container: #9dd49f;
-        
-        --md-sys-color-secondary: #b8ccb9;
-        --md-sys-color-on-secondary: #243426;
-        --md-sys-color-secondary-container: #3a4b3c;
-        --md-sys-color-on-secondary-container: #d4e8d5;
-        
-        --md-sys-color-surface: #101418;
-        --md-sys-color-surface-variant: #414943;
-        --md-sys-color-on-surface: #e1e2e8;
-        --md-sys-color-on-surface-variant: #c1c9c1;
-        
-        --md-sys-color-background: #0f1419;
-        --md-sys-color-on-background: #e1e2e8;
-        
-        --md-sys-color-error: #ffb4ab;
-        --md-sys-color-on-error: #690005;
-        
-        --md-sys-color-outline: #8b9389;
-        --md-sys-color-outline-variant: #414943;
-    }
-    
-    /* Dark theme specific adjustments */
-    .promo-banner {
-        background: linear-gradient(135deg, var(--md-sys-color-primary-container) 0%, #00531a 100%);
-    }
-    
-    .promo-comment {
-        background: linear-gradient(135deg, #1a2e1b 0%, #243426 100%);
-        border-color: var(--md-sys-color-primary);
-    }
-    
-    .comment.suspicious-review {
-        background: linear-gradient(135deg, #2d1b00 0%, #3d2500 100%);
-        border-color: #ff9800;
-    }
-    
-    .farm-tooltip {
-        background: var(--md-sys-color-surface);
-        color: var(--md-sys-color-on-surface);
-    }
-}
-
-/* High Contrast Support */
-@media (prefers-contrast: high) {
-    :root {
-        --md-sys-color-outline: #000000;
-        --md-sys-color-outline-variant: #333333;
-    }
-    
-    .md-button {
-        border: 2px solid currentColor;
-    }
-    
-    .md-text-field input,
-    .md-text-field textarea,
-    .md-select select {
-        border-width: 2px;
-    }
-}
-
-/* Reduced Motion Support */
-@media (prefers-reduced-motion: reduce) {
-    * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-    
-    .modal-content {
-        animation: none;
-    }
-    
-    .promo-banner {
-        animation: none;
-    }
-}
-
-
-@media (max-width: 480px) {
-    .modal-header h2 {
-        font-size: 20px;
-    }
-    
-    .code-display {
-        font-size: 18px;
-        letter-spacing: 1px;
-    }
-}
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карта ферм Великобритании</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div id="app">
+        <header>
+            <div class="header-content">
+                <div class="header-title">
+                    <span class="material-symbols-outlined header-icon">agriculture</span>
+                    <h1>Карта ферм Великобритании</h1>
+                </div>
+
+                <div class="header-buttons">
+                    <button id="loginBtn" class="md-button md-outlined-button">
+                        <span class="material-symbols-outlined">login</span>
+                        <span>Войти</span>
+                    </button>
+                    <button id="addFarmBtn" class="md-button md-filled-button">
+                        <span class="material-symbols-outlined">add_circle</span>
+                        <span>Добавить ферму</span>
+                    </button>
+                    <div id="userInfo" style="display: none; align-items: center; gap: 8px;">
+                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">account_circle</span>
+                        <span id="userEmail" style="font-size: 14px;"></span>
+                        <button id="logoutBtn" class="md-button md-text-button">
+                            <span class="material-symbols-outlined">logout</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div id="map"></div>
+
+        <!-- Рекламный баннер White Tax Returns -->
+        <div class="promo-banner">
+            <div class="promo-banner-content">
+                <span class="material-symbols-outlined">account_balance</span>
+                <div class="promo-text">
+                    <strong>White Tax Returns</strong> — Верните свои налоги! Без предоплаты.
+                </div>
+                <a href="https://whitetax.site/sng" target="_blank" rel="noopener" class="promo-link">
+                    Подать заявку
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Модальное окно: Авторизация -->
+        <div id="authModal" class="modal">
+            <div class="modal-content md-surface">
+                <div class="modal-header">
+                    <h2>Вход</h2>
+                    <button class="close-btn">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="padding: 32px;">
+                    <div style="text-align: center; margin-bottom: 24px;">
+                        <span class="material-symbols-outlined auth-icon">lock</span>
+                        <h3 class="auth-title">Требуется авторизация</h3>
+                        <p class="auth-description">
+                            Чтобы просматривать информацию о фермах, необходимо войти или добавить свой отзыв.
+                        </p>
+                    </div>
+                    
+                    <div class="md-text-field">
+                        <input type="email" id="loginEmail" placeholder=" " required>
+                        <label>Введите ваш Gmail</label>
+                    </div>
+                    
+                    <button id="loginSubmitBtn" class="md-button md-filled-button full-width" style="margin-bottom: 16px;">
+                        <span class="material-symbols-outlined">login</span>
+                        <span>Войти</span>
+                    </button>
+                    
+                    <div class="auth-divider">
+                        <span>или</span>
+                    </div>
+                    
+                    <button id="addReviewBtn" class="md-button md-outlined-button full-width">
+                        <span class="material-symbols-outlined">rate_review</span>
+                        <span>Добавить отзыв о ферме</span>
+                    </button>
+                    
+                    <p class="auth-note">
+                        Если вы еще не добавляли отзывы, нажмите "Добавить отзыв о ферме"
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно: Форма добавления фермы -->
+        <div id="farmModal" class="modal">
+            <div class="modal-content large md-surface">
+                <div class="modal-header">
+                    <h2>Добавить информацию о ферме</h2>
+                    <button class="close-btn">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="farmForm">
+                        <div class="md-select">
+                            <select id="farmType" required>
+                                <option value="">Выберите тип фермы</option>
+                                <option value="vegetables">🥬 Овощная ферма</option>
+                                <option value="tomatoes">🍅 Томатная ферма</option>
+                                <option value="berries">🍓 Ягодная ферма</option>
+                                <option value="mushrooms">🍄‍🟫 Грибная ферма</option>
+                                <option value="flowers">🌷 Цветочная ферма</option>
+                                <option value="apples">🍎 Яблочная ферма</option>
+                            </select>
+                            <label>Тип фермы *</label>
+                        </div>
+
+                        <div class="md-text-field autocomplete-wrapper">
+                            <input type="text" id="farmName" placeholder=" " required autocomplete="off">
+                            <label>Название фермы *</label>
+                            <div id="farmSuggestions" class="suggestions-list"></div>
+                        </div>
+
+                        <div class="md-text-field">
+                            <input type="text" id="farmAddress" placeholder=" " required>
+                            <label>Адрес *</label>
+                        </div>
+
+                        <div class="md-text-field">
+                            <input type="text" id="farmPostcode" placeholder=" " required>
+                            <label>Postcode *</label>
+                        </div>
+
+                        <div class="md-text-field">
+                            <input type="email" id="farmEmail" placeholder=" ">
+                            <label>Email фермы</label>
+                        </div>
+
+                        <div class="md-select">
+                            <select id="farmOperator" required>
+                                <option value="">Выберите оператора</option>
+                                <option value="AgriHR">AgriHR</option>
+                                <option value="Concordia">Concordia</option>
+                                <option value="Fruitful Jobs">Fruitful Jobs</option>
+                                <option value="Pro-Force">Pro-Force</option>
+                                <option value="HOPS">HOPS</option>
+                            </select>
+                            <label>Оператор Seasonal Worker Programme *</label>
+                        </div>
+
+                        <div class="rating-section">
+                            <label class="rating-label">Оценка фермы *</label>
+                            <div class="md-rating">
+                                <button type="button" class="star-btn" data-rating="1">
+                                    <span class="material-symbols-outlined">star</span>
+                                </button>
+                                <button type="button" class="star-btn" data-rating="2">
+                                    <span class="material-symbols-outlined">star</span>
+                                </button>
+                                <button type="button" class="star-btn" data-rating="3">
+                                    <span class="material-symbols-outlined">star</span>
+                                </button>
+                                <button type="button" class="star-btn" data-rating="4">
+                                    <span class="material-symbols-outlined">star</span>
+                                </button>
+                                <button type="button" class="star-btn" data-rating="5">
+                                    <span class="material-symbols-outlined">star</span>
+                                </button>
+                            </div>
+                            <input type="hidden" id="farmRating" required>
+                        </div>
+
+                        <div class="md-text-field">
+                            <textarea id="farmComment" placeholder=" " rows="4"></textarea>
+                            <label>Комментарий</label>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="md-text-field">
+                                <input type="number" id="farmEarnings" placeholder=" " min="0">
+                                <label>Заработок (£)</label>
+                            </div>
+
+                            <div class="md-text-field">
+                                <input type="number" id="farmDuration" placeholder=" " min="1" max="12">
+                                <label>Месяцев</label>
+                            </div>
+                        </div>
+
+                        <div class="md-text-field">
+                            <input type="email" id="userGmail" placeholder=" " required>
+                            <label>Ваш Gmail для входа *</label>
+                            <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-top: 4px;">
+                                Используйте этот Gmail для входа в следующий раз
+                            </div>
+                        </div>
+
+                        <button type="submit" class="md-button md-filled-button full-width">
+                            <span class="material-symbols-outlined">send</span>
+                            <span>Отправить</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно: Информация о ферме -->
+        <div id="infoModal" class="modal">
+            <div class="modal-content large md-surface">
+                <div class="modal-header">
+                    <button class="close-btn">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="farmInfo"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
