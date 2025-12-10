@@ -4,6 +4,52 @@ let markers = [];
 let userEmail = null;
 let googleUser = null;
 
+// Система уведомлений Material Design 3
+function showNotification(message, type = 'info', duration = 4000) {
+    // Создаем контейнер для уведомлений если его нет
+    let container = document.getElementById('notifications-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'notifications-container';
+        container.className = 'notifications-container';
+        document.body.appendChild(container);
+    }
+
+    // Создаем уведомление
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    
+    // Иконка в зависимости от типа
+    const icons = {
+        success: 'check_circle',
+        error: 'error',
+        warning: 'warning',
+        info: 'info'
+    };
+    
+    notification.innerHTML = `
+        <span class="material-symbols-outlined notification-icon">${icons[type] || 'info'}</span>
+        <span class="notification-message">${message}</span>
+        <button class="notification-close" onclick="this.parentElement.remove()">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+    `;
+    
+    // Добавляем в контейнер
+    container.appendChild(notification);
+    
+    // Анимация появления
+    setTimeout(() => notification.classList.add('show'), 10);
+    
+    // Автоматическое удаление
+    if (duration > 0) {
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, duration);
+    }
+}
+
 // Проверка Telegram WebApp
 const tg = window.Telegram?.WebApp;
 if (tg) {
@@ -117,23 +163,38 @@ function initMap() {
 // Загрузка ферм с сервера
 async function loadFarms() {
     try {
+        console.log('Загружаем фермы с:', `${CONFIG.GOOGLE_SCRIPT_URL}?action=getFarms`);
         const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=getFarms`);
+        console.log('Ответ загрузки ферм:', response.status, response.statusText);
+        
         const farms = await response.json();
+        console.log('Получено ферм:', farms.length, farms);
+        
         displayFarms(farms);
     } catch (error) {
         console.error('Ошибка загрузки ферм:', error);
-        alert('Не удалось загрузить данные. Проверьте настройки в config.js');
+        showNotification('Не удалось загрузить данные. Проверьте настройки в config.js', 'error');
     }
 }
 
 // Отображение ферм на карте
 function displayFarms(farms) {
+    console.log('Отображаем фермы на карте:', farms.length);
+    
     // Очистка старых маркеров
     markers.forEach(marker => map.removeLayer(marker));
     markers = [];
 
     // Добавление маркеров на карту
-    farms.forEach(farm => {
+    farms.forEach((farm, index) => {
+        console.log(`Ферма ${index + 1}:`, {
+            name: farm.name,
+            postcode: farm.postcode,
+            lat: farm.lat,
+            lng: farm.lng,
+            hasCoordinates: !!(farm.lat && farm.lng)
+        });
+        
         if (farm.lat && farm.lng) {
             // Создаем кастомную иконку с эмодзи
             const emoji = getFarmEmoji(farm.type);
@@ -165,8 +226,13 @@ function displayFarms(farms) {
             });
 
             markers.push(marker);
+            console.log(`Маркер добавлен для ${farm.name} в координатах [${farm.lat}, ${farm.lng}]`);
+        } else {
+            console.warn(`Ферма ${farm.name} не имеет координат:`, farm);
         }
     });
+    
+    console.log(`Всего маркеров на карте: ${markers.length}`);
 }
 
 // Модальные окна
@@ -218,13 +284,13 @@ document.getElementById('loginSubmitBtn').onclick = async () => {
     const email = document.getElementById('loginEmail').value.trim();
     
     if (!email) {
-        alert('Введите Gmail');
+        showNotification('Введите Gmail', 'warning');
         return;
     }
     
     // Проверяем, что это Gmail
     if (!email.endsWith('@gmail.com')) {
-        alert('❌ Пожалуйста, используйте Gmail аккаунт (example@gmail.com)');
+        showNotification('Пожалуйста, используйте Gmail аккаунт (example@gmail.com)', 'warning');
         return;
     }
     
@@ -292,9 +358,12 @@ document.getElementById('farmForm').onsubmit = async (e) => {
     };
 
     if (!formData.rating) {
-        alert('Пожалуйста, поставьте оценку');
+        showNotification('Пожалуйста, поставьте оценку', 'warning');
         return;
     }
+
+    console.log('Отправляем данные:', formData);
+    showNotification('Отправляем данные...', 'info', 2000);
 
     try {
         const response = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
@@ -302,7 +371,10 @@ document.getElementById('farmForm').onsubmit = async (e) => {
             body: JSON.stringify(formData)
         });
 
+        console.log('Ответ сервера:', response.status, response.statusText);
+        
         const result = await response.json();
+        console.log('Результат:', result);
 
         if (result.success) {
             // Сохраняем Gmail пользователя для автоматического входа
@@ -310,21 +382,23 @@ document.getElementById('farmForm').onsubmit = async (e) => {
             localStorage.setItem('userEmail', userEmail);
             updateUIForLoggedInUser();
 
-            alert('✅ Информация успешно добавлена!\n\nТеперь вы можете входить используя ваш Gmail: ' + userEmail);
+            showNotification('Информация успешно добавлена! Теперь вы можете входить используя ваш Gmail: ' + userEmail, 'success', 6000);
             farmModal.style.display = 'none';
 
             // Обновить карту
+            console.log('Обновляем карту...');
             loadFarms();
 
             // Очистить форму
             document.getElementById('farmForm').reset();
             starBtns.forEach(s => s.classList.remove('active'));
         } else {
-            alert('Ошибка: ' + result.message);
+            console.error('Ошибка от сервера:', result);
+            showNotification('Ошибка: ' + result.message, 'error');
         }
     } catch (error) {
         console.error('Ошибка отправки данных:', error);
-        alert('Ошибка отправки данных');
+        showNotification('Ошибка отправки данных: ' + error.message, 'error');
     }
 };
 
@@ -439,15 +513,15 @@ window.reportReview = async function (postcode, reviewIndex) {
         const result = await response.json();
 
         if (result.success) {
-            alert('✅ Спасибо! Жалоба отправлена.\n\nМы проверим этот отзыв. Если будет 3+ жалобы, отзыв будет скрыт автоматически.');
+            showNotification('Спасибо! Жалоба отправлена. Мы проверим этот отзыв. Если будет 3+ жалобы, отзыв будет скрыт автоматически.', 'success', 6000);
             // Обновить данные
             loadFarms();
         } else {
-            alert('❌ Ошибка: ' + result.message);
+            showNotification('Ошибка: ' + result.message, 'error');
         }
     } catch (error) {
         console.error('Ошибка отправки жалобы:', error);
-        alert('❌ Не удалось отправить жалобу. Попробуйте позже.');
+        showNotification('Не удалось отправить жалобу. Попробуйте позже.', 'error');
     }
 };
 
@@ -583,14 +657,14 @@ async function checkUserRegistration(email) {
             localStorage.setItem('userEmail', userEmail);
             updateUIForLoggedInUser();
             authModal.style.display = 'none';
-            alert('✅ Добро пожаловать, ' + email + '!');
+            showNotification('Добро пожаловать, ' + email + '!', 'success');
         } else {
             // Пользователь не зарегистрирован
-            alert('❌ Этот Gmail не зарегистрирован.\n\nДобавьте отзыв о ферме, чтобы зарегистрироваться.');
+            showNotification('Этот Gmail не зарегистрирован. Добавьте отзыв о ферме, чтобы зарегистрироваться.', 'warning', 5000);
         }
     } catch (error) {
         console.error('Ошибка проверки пользователя:', error);
-        alert('❌ Ошибка проверки. Попробуйте позже.');
+        showNotification('Ошибка проверки. Попробуйте позже.', 'error');
     }
 }
 
