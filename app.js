@@ -18,6 +18,27 @@ class TelegramWebApp {
         // Получаем данные пользователя
         this.user = this.tg.initDataUnsafe?.user;
         
+        console.log('🤖 Telegram Web App initialization:');
+        console.log('- initDataUnsafe:', this.tg.initDataUnsafe);
+        console.log('- user:', this.user);
+        console.log('- platform:', this.tg.platform);
+        console.log('- version:', this.tg.version);
+        
+        // Если пользователь не найден в initDataUnsafe, попробуем другие способы
+        if (!this.user && this.tg.initData) {
+            console.log('🔍 Trying to parse initData manually...');
+            try {
+                const urlParams = new URLSearchParams(this.tg.initData);
+                const userParam = urlParams.get('user');
+                if (userParam) {
+                    this.user = JSON.parse(decodeURIComponent(userParam));
+                    console.log('✅ User found in initData:', this.user);
+                }
+            } catch (error) {
+                console.log('❌ Failed to parse initData:', error);
+            }
+        }
+        
         // Настраиваем тему
         this.setupTheme();
         
@@ -30,11 +51,7 @@ class TelegramWebApp {
         // Обработчики событий
         this.setupEventHandlers();
         
-        console.log('Telegram Web App initialized:', {
-            user: this.user,
-            platform: this.tg.platform,
-            version: this.tg.version
-        });
+        console.log('✅ Telegram Web App initialized with user:', this.user);
     }
     
     setupTheme() {
@@ -198,6 +215,10 @@ class UKFarmsMap {
     initTelegramIntegration() {
         if (!this.telegramApp.isInTelegram) return;
         
+        console.log('🤖 Telegram Web App detected');
+        console.log('User authorized:', this.telegramApp.isUserAuthorized());
+        console.log('User data:', this.telegramApp.getUserData());
+        
         // Автоматическая авторизация через Telegram
         if (this.telegramApp.isUserAuthorized()) {
             const userData = this.telegramApp.getUserData();
@@ -207,12 +228,34 @@ class UKFarmsMap {
                 lastName: userData.lastName,
                 username: userData.username,
                 email: `${userData.username || userData.id}@telegram.user`, // Виртуальный email
-                source: 'telegram'
+                source: 'telegram',
+                reviewCount: 0 // Telegram пользователи начинают с 0 отзывов
             };
             
             // Сохраняем в localStorage
             localStorage.setItem('telegramUser', JSON.stringify(this.currentUser));
             localStorage.setItem('userEmail', this.currentUser.email);
+            
+            console.log('✅ Telegram user authorized:', this.currentUser);
+        } else {
+            // Fallback: если мы в Telegram Web App, но данные пользователя недоступны,
+            // все равно считаем пользователя авторизованным
+            console.log('⚠️ Telegram user data not available, using fallback authorization');
+            this.currentUser = {
+                id: 'telegram_user_' + Date.now(),
+                firstName: 'Telegram',
+                lastName: 'User',
+                username: 'telegram_user',
+                email: `telegram_user_${Date.now()}@telegram.user`,
+                source: 'telegram',
+                reviewCount: 0
+            };
+            
+            // Сохраняем в localStorage
+            localStorage.setItem('telegramUser', JSON.stringify(this.currentUser));
+            localStorage.setItem('userEmail', this.currentUser.email);
+            
+            console.log('✅ Telegram fallback user created:', this.currentUser);
         }
         
         // Настраиваем интерфейс для Telegram
@@ -241,12 +284,19 @@ class UKFarmsMap {
     }
 
     checkSavedUser() {
+        // Если пользователь уже авторизован через Telegram, не перезаписываем
+        if (this.currentUser && this.currentUser.source === 'telegram') {
+            console.log('🤖 Telegram user already authorized, skipping saved user check');
+            return;
+        }
+        
         const savedEmail = localStorage.getItem('userEmail');
         if (savedEmail) {
             this.currentUser = { email: savedEmail };
             // Можно добавить счетчик отзывов пользователя
             const reviewCount = localStorage.getItem('userReviewCount') || '0';
             this.currentUser.reviewCount = parseInt(reviewCount);
+            console.log('✅ Saved user loaded:', this.currentUser);
         }
     }
 
@@ -801,11 +851,18 @@ class UKFarmsMap {
     }
 
     showFarmInfo(farm) {
+        console.log('🏭 showFarmInfo called for:', farm.name);
+        console.log('👤 Current user:', this.currentUser);
+        console.log('🤖 Is in Telegram:', this.telegramApp.isInTelegram);
+        
         // Проверяем авторизацию пользователя
         if (!this.currentUser) {
+            console.log('❌ No current user, showing auth required message');
             this.showAuthRequiredMessage(farm);
             return;
         }
+        
+        console.log('✅ User authorized, showing farm info');
 
         const farmType = CONFIG.FARM_TYPES[farm.type];
         const avgRating = this.calculateAverageRating(farm.reviews || []);
