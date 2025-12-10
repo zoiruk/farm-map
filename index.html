@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Карта ферм Великобритании</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div id="app">
         <header>
@@ -19,20 +22,27 @@
                 </div>
 
                 <div class="header-buttons">
+                    <button id="loginBtn" class="md-button md-outlined-button">
+                        <span class="material-symbols-outlined">login</span>
+                        <span>Войти</span>
+                    </button>
                     <button id="addFarmBtn" class="md-button md-filled-button">
                         <span class="material-symbols-outlined">add_circle</span>
                         <span>Добавить ферму</span>
                     </button>
-                    <button id="enterCodeBtn" class="md-button md-outlined-button">
-                        <span class="material-symbols-outlined">key</span>
-                        <span>Ввести код</span>
-                    </button>
+                    <div id="userInfo" style="display: none; align-items: center; gap: 8px;">
+                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">account_circle</span>
+                        <span id="userEmail" style="font-size: 14px;"></span>
+                        <button id="logoutBtn" class="md-button md-text-button">
+                            <span class="material-symbols-outlined">logout</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </header>
 
         <div id="map"></div>
-        
+
         <!-- Рекламный баннер White Tax Returns -->
         <div class="promo-banner">
             <div class="promo-banner-content">
@@ -47,24 +57,46 @@
             </div>
         </div>
 
-        <!-- Модальное окно: Ввод кода -->
-        <div id="codeModal" class="modal">
+        <!-- Модальное окно: Авторизация -->
+        <div id="authModal" class="modal">
             <div class="modal-content md-surface">
                 <div class="modal-header">
-                    <h2>Введите ваш код</h2>
+                    <h2>Вход</h2>
                     <button class="close-btn">
                         <span class="material-symbols-outlined">close</span>
                     </button>
                 </div>
-                <div class="modal-body">
-                    <div class="md-text-field">
-                        <input type="text" id="codeInput" placeholder=" " required>
-                        <label>Уникальный код</label>
+                <div class="modal-body" style="padding: 32px;">
+                    <div style="text-align: center; margin-bottom: 24px;">
+                        <span class="material-symbols-outlined auth-icon">lock</span>
+                        <h3 class="auth-title">Требуется авторизация</h3>
+                        <p class="auth-description">
+                            Чтобы просматривать информацию о фермах, необходимо войти или добавить свой отзыв.
+                        </p>
                     </div>
-                    <button id="submitCodeBtn" class="md-button md-filled-button full-width">
+                    
+                    <div class="md-text-field">
+                        <input type="email" id="loginEmail" placeholder=" " required>
+                        <label>Введите ваш Gmail</label>
+                    </div>
+                    
+                    <button id="loginSubmitBtn" class="md-button md-filled-button full-width" style="margin-bottom: 16px;">
                         <span class="material-symbols-outlined">login</span>
                         <span>Войти</span>
                     </button>
+                    
+                    <div class="auth-divider">
+                        <span>или</span>
+                    </div>
+                    
+                    <button id="addReviewBtn" class="md-button md-outlined-button full-width">
+                        <span class="material-symbols-outlined">rate_review</span>
+                        <span>Добавить отзыв о ферме</span>
+                    </button>
+                    
+                    <p class="auth-note">
+                        Если вы еще не добавляли отзывы, нажмите "Добавить отзыв о ферме"
+                    </p>
                 </div>
             </div>
         </div>
@@ -93,10 +125,10 @@
                             <label>Тип фермы *</label>
                         </div>
 
-                        <div class="md-text-field">
-                            <input type="text" id="farmName" placeholder=" " required autocomplete="off" list="farmNamesList">
-                            <datalist id="farmNamesList"></datalist>
+                        <div class="md-text-field autocomplete-wrapper">
+                            <input type="text" id="farmName" placeholder=" " required autocomplete="off">
                             <label>Название фермы *</label>
+                            <div id="farmSuggestions" class="suggestions-list"></div>
                         </div>
 
                         <div class="md-text-field">
@@ -165,17 +197,19 @@
                             </div>
                         </div>
 
+                        <div class="md-text-field">
+                            <input type="email" id="userGmail" placeholder=" " required>
+                            <label>Ваш Gmail для входа *</label>
+                            <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-top: 4px;">
+                                Используйте этот Gmail для входа в следующий раз
+                            </div>
+                        </div>
+
                         <button type="submit" class="md-button md-filled-button full-width">
                             <span class="material-symbols-outlined">send</span>
                             <span>Отправить</span>
                         </button>
                     </form>
-                    <div id="generatedCode" class="md-card success-card" style="display:none;">
-                        <span class="material-symbols-outlined success-icon">check_circle</span>
-                        <h3>Ваш уникальный код:</h3>
-                        <p class="code-display"></p>
-                        <p class="code-info">Сохраните этот код для следующего входа!</p>
-                    </div>
                 </div>
             </div>
         </div>
@@ -200,4 +234,5 @@
     <script src="config.js"></script>
     <script src="app.js"></script>
 </body>
+
 </html>
