@@ -78,8 +78,16 @@ class TelegramWebApp {
         this.tg.MainButton.textColor = this.tg.themeParams.button_text_color || '#ffffff';
         
         this.tg.MainButton.onClick(() => {
+            console.log('🤖 Telegram Main Button clicked');
+            // Используем прямую ссылку на приложение через глобальную переменную
             if (window.app) {
+                console.log('✅ Found window.app, calling showAddFarmModal');
                 window.app.showAddFarmModal();
+            } else {
+                console.log('❌ window.app not found, trying to find app instance');
+                // Fallback: ищем приложение через DOM события
+                const event = new CustomEvent('telegramMainButtonClick');
+                document.dispatchEvent(event);
             }
         });
     }
@@ -108,8 +116,15 @@ class TelegramWebApp {
     }
     
     showMainButton(text = 'Добавить ферму') {
+        if (!this.tg) {
+            console.log('❌ Telegram WebApp not available');
+            return;
+        }
+        
+        console.log('🤖 Showing Telegram Main Button:', text);
         this.tg.MainButton.setText(text);
         this.tg.MainButton.show();
+        console.log('✅ Telegram Main Button shown');
     }
     
     hideMainButton() {
@@ -239,7 +254,7 @@ class UKFarmsMap {
             console.log('✅ Telegram user authorized:', this.currentUser);
         } else {
             // Fallback: если мы в Telegram Web App, но данные пользователя недоступны,
-            // все равно считаем пользователя авторизованным
+            // создаем пользователя, но он должен внести вклад для доступа к информации
             console.log('⚠️ Telegram user data not available, using fallback authorization');
             this.currentUser = {
                 id: 'telegram_user_' + Date.now(),
@@ -248,14 +263,15 @@ class UKFarmsMap {
                 username: 'telegram_user',
                 email: `telegram_user_${Date.now()}@telegram.user`,
                 source: 'telegram',
-                reviewCount: 0
+                reviewCount: 0 // Начинает с 0 - должен добавить отзыв для доступа
             };
             
             // Сохраняем в localStorage
             localStorage.setItem('telegramUser', JSON.stringify(this.currentUser));
             localStorage.setItem('userEmail', this.currentUser.email);
+            localStorage.setItem('userReviewCount', '0');
             
-            console.log('✅ Telegram fallback user created:', this.currentUser);
+            console.log('✅ Telegram fallback user created (needs to contribute):', this.currentUser);
         }
         
         // Настраиваем интерфейс для Telegram
@@ -263,24 +279,46 @@ class UKFarmsMap {
     }
     
     setupTelegramUI() {
-        // Скрываем заголовок в Telegram (он есть в самом Telegram)
+        // Скрываем только заголовок с названием, но оставляем кнопки
+        const headerTitle = document.querySelector('.app-header h1');
+        if (headerTitle) {
+            headerTitle.style.display = 'none';
+        }
+        
+        // Делаем заголовок более компактным
         const header = document.querySelector('.app-header');
         if (header) {
-            header.style.display = 'none';
+            header.style.minHeight = '60px';
+            header.style.padding = '8px 16px';
+        }
+        
+        // Центрируем кнопки действий
+        const headerActions = document.querySelector('.header-actions');
+        if (headerActions) {
+            headerActions.style.justifyContent = 'center';
+            headerActions.style.width = '100%';
         }
         
         // Увеличиваем высоту карты
         const mainContent = document.querySelector('.main-content');
         if (mainContent) {
-            mainContent.style.height = '100vh';
+            mainContent.style.height = 'calc(100vh - 60px)'; // Учитываем компактный заголовок
             mainContent.style.paddingBottom = '60px'; // Место для рекламы
         }
         
-        // Показываем главную кнопку Telegram
+        // Показываем главную кнопку Telegram (дублирует кнопку "Добавить ферму")
         this.telegramApp.showMainButton('Добавить ферму');
+        
+        // Скрываем дублирующую кнопку "Добавить ферму" в заголовке (есть главная кнопка Telegram)
+        const addFarmBtn = document.getElementById('addFarmBtn');
+        if (addFarmBtn) {
+            addFarmBtn.style.display = 'none';
+        }
         
         // Добавляем класс для стилизации
         document.body.classList.add('telegram-web-app');
+        
+        console.log('✅ Telegram UI configured - buttons should be visible');
     }
 
     checkSavedUser() {
@@ -604,6 +642,11 @@ class UKFarmsMap {
             this.hideFarmInfoPanel();
         });
 
+        // Panel backdrop close
+        document.getElementById('farmInfoBackdrop').addEventListener('click', () => {
+            this.hideFarmInfoPanel();
+        });
+
         // Form submissions
         document.getElementById('addFarmForm').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -666,6 +709,12 @@ class UKFarmsMap {
                 this.hideAllModals();
                 this.hideFarmInfoPanel();
             }
+        });
+
+        // Telegram Main Button fallback handler
+        document.addEventListener('telegramMainButtonClick', () => {
+            console.log('📱 Telegram Main Button fallback event received');
+            this.showAddFarmModal();
         });
     }
 
@@ -819,7 +868,8 @@ class UKFarmsMap {
 
         // Add popup
         const avgRating = this.calculateAverageRating(farm.reviews || []);
-        const isAuthorized = this.currentUser !== null;
+        // Проверяем, авторизован ли пользователь И внес ли он вклад
+        const isAuthorized = this.currentUser && this.hasUserContributed();
         
         const popupContent = isAuthorized ? `
             <div class="farm-popup">
@@ -834,13 +884,13 @@ class UKFarmsMap {
             </div>
         ` : `
             <div class="farm-popup" style="text-align: center; padding: 20px;">
-                <span class="material-symbols-outlined" style="font-size: 32px; color: var(--md-sys-color-primary); margin-bottom: 12px; display: block;">lock</span>
-                <h4 style="margin: 0 0 12px 0; color: var(--md-sys-color-on-surface);">Требуется авторизация</h4>
+                <span class="material-symbols-outlined" style="font-size: 32px; color: var(--md-sys-color-primary); margin-bottom: 12px; display: block;">swap_horiz</span>
+                <h4 style="margin: 0 0 12px 0; color: var(--md-sys-color-on-surface);">Поделитесь опытом</h4>
                 <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 16px;">
-                    Поделитесь опытом, чтобы получить доступ к информации
+                    Расскажите о своей работе на ферме, чтобы узнать опыт других
                 </p>
                 <button onclick="app.showFarmInfo(${JSON.stringify(farm).replace(/"/g, '&quot;')})" class="btn-primary" style="margin-top: 8px; width: 100%; font-size: 12px; padding: 8px 12px;">
-                    Авторизоваться
+                    Добавить отзыв
                 </button>
             </div>
         `;
@@ -855,14 +905,15 @@ class UKFarmsMap {
         console.log('👤 Current user:', this.currentUser);
         console.log('🤖 Is in Telegram:', this.telegramApp.isInTelegram);
         
-        // Проверяем авторизацию пользователя
-        if (!this.currentUser) {
-            console.log('❌ No current user, showing auth required message');
+        // Проверяем авторизацию для ВСЕХ пользователей (включая Telegram)
+        // Принцип справедливого обмена: поделись отзывом - получи доступ к отзывам других
+        if (!this.currentUser || !this.hasUserContributed()) {
+            console.log('❌ User not authorized or has not contributed, showing auth required message');
             this.showAuthRequiredMessage(farm);
             return;
         }
         
-        console.log('✅ User authorized, showing farm info');
+        console.log('✅ User authorized and has contributed, showing farm info');
 
         const farmType = CONFIG.FARM_TYPES[farm.type];
         const avgRating = this.calculateAverageRating(farm.reviews || []);
@@ -913,19 +964,33 @@ class UKFarmsMap {
         }
     }
 
+    hasUserContributed() {
+        // Проверяем, внес ли пользователь вклад (добавил ферму или отзыв)
+        if (!this.currentUser) {
+            return false;
+        }
+        
+        // Проверяем количество отзывов пользователя
+        const reviewCount = this.currentUser.reviewCount || 0;
+        console.log('👤 User review count:', reviewCount);
+        
+        // Пользователь должен добавить хотя бы 1 отзыв или ферму
+        return reviewCount > 0;
+    }
+
     showAuthRequiredMessage(farm) {
         const content = `
             <div style="text-align: center; padding: 40px 20px; background: linear-gradient(135deg, var(--md-sys-color-primary-container), var(--md-sys-color-surface)); border-radius: 12px; margin: 20px 0;">
                 <span class="material-symbols-outlined" style="font-size: 48px; color: var(--md-sys-color-primary); margin-bottom: 16px; display: block;">lock</span>
-                <h3 style="color: var(--md-sys-color-on-primary-container); margin-bottom: 12px;">Требуется авторизация</h3>
+                <h3 style="color: var(--md-sys-color-on-primary-container); margin-bottom: 12px;">Поделитесь своим опытом</h3>
                 <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 16px; line-height: 1.5;">
-                    Чтобы увидеть подробную информацию о фермах, отзывы работников, зарплаты и условия работы, поделитесь своим опытом.
+                    Чтобы увидеть отзывы других работников, зарплаты и условия работы на фермах, расскажите о своем опыте.
                 </p>
                 <p style="color: var(--md-sys-color-primary); margin-bottom: 16px; font-size: 14px; font-weight: 500;">
-                    💡 Принцип справедливого обмена: поделись опытом — получи доступ к опыту других!
+                    💡 Справедливый обмен: поделись отзывом — узнай отзывы других!
                 </p>
                 <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 24px; font-size: 13px;">
-                    Добавьте информацию о любой ферме, где вы работали, и получите полный доступ ко всей информации на сайте.
+                    Добавьте информацию о любой ферме, где вы работали, и получите доступ ко всем отзывам на сайте.
                 </p>
                 
                 <button class="btn-primary" onclick="app.showAddFarmModal()" style="margin-bottom: 12px; width: 100%;">
@@ -1054,13 +1119,20 @@ class UKFarmsMap {
     }
 
     showAddFarmModal() {
+        console.log('🏭 showAddFarmModal called');
+        console.log('👤 Current user:', this.currentUser);
+        console.log('🤖 Is in Telegram:', this.telegramApp.isInTelegram);
+        
         this.showModal('addFarmModal');
         this.resetAddFarmForm();
         
         // Pre-fill email if user is logged in
         if (this.currentUser && this.currentUser.email) {
             document.getElementById('userEmail').value = this.currentUser.email;
+            console.log('✅ Pre-filled email:', this.currentUser.email);
         }
+        
+        console.log('✅ Add farm modal opened');
     }
 
     resetAddFarmForm() {
@@ -2868,11 +2940,13 @@ let app;
 document.addEventListener('DOMContentLoaded', () => {
     app = new UKFarmsMap();
     
+    // Make app globally available immediately
+    window.app = app;
+    
     // Глобальная переменная для Telegram Web App
     if (window.Telegram?.WebApp) {
         window.telegramApp = app.telegramApp;
     }
+    
+    console.log('✅ App initialized and made globally available');
 });
-
-// Make app globally available for onclick handlers
-window.app = app;
