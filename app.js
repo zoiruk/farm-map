@@ -1,7 +1,8 @@
 // Инициализация карты
 let map;
 let markers = [];
-let userCode = null;
+let userEmail = null;
+let googleUser = null;
 
 // Проверка Telegram WebApp
 const tg = window.Telegram?.WebApp;
@@ -147,9 +148,9 @@ function displayFarms(farms) {
             const marker = L.marker([farm.lat, farm.lng], { icon: customIcon })
                 .addTo(map)
                 .on('click', () => {
-                    // Проверяем авторизацию пользователя
-                    if (!userCode) {
-                        alert('Чтобы просматривать информацию о фермах, необходимо добавить свой отзыв или ввести код доступа.');
+                    // Проверяем авторизацию
+                    if (!userEmail) {
+                        authModal.style.display = 'block';
                         return;
                     }
                     showFarmInfo(farm);
@@ -169,14 +170,75 @@ function displayFarms(farms) {
 }
 
 // Модальные окна
-const codeModal = document.getElementById('codeModal');
+const authModal = document.getElementById('authModal');
 const farmModal = document.getElementById('farmModal');
 const infoModal = document.getElementById('infoModal');
 
-document.getElementById('enterCodeBtn').onclick = () => {
-    codeModal.style.display = 'block';
+// Проверка авторизации при загрузке
+function checkAuth() {
+    const savedEmail = localStorage.getItem('userEmail');
+    if (savedEmail) {
+        userEmail = savedEmail;
+        updateUIForLoggedInUser();
+    }
+}
+
+// Обновление UI для авторизованного пользователя
+function updateUIForLoggedInUser() {
+    document.getElementById('loginBtn').style.display = 'none';
+    document.getElementById('userInfo').style.display = 'flex';
+    document.getElementById('userEmail').textContent = userEmail;
+}
+
+// Обновление UI для неавторизованного пользователя
+function updateUIForLoggedOutUser() {
+    document.getElementById('loginBtn').style.display = 'flex';
+    document.getElementById('userInfo').style.display = 'none';
+    userEmail = null;
+    localStorage.removeItem('userEmail');
+}
+
+// Кнопка "Войти"
+document.getElementById('loginBtn').onclick = () => {
+    authModal.style.display = 'block';
 };
 
+// Кнопка "Выйти"
+document.getElementById('logoutBtn').onclick = () => {
+    if (confirm('Вы уверены, что хотите выйти?')) {
+        updateUIForLoggedOutUser();
+        if (googleUser) {
+            google.accounts.id.disableAutoSelect();
+        }
+    }
+};
+
+// Кнопка "Войти" в модальном окне авторизации
+document.getElementById('loginSubmitBtn').onclick = async () => {
+    const email = document.getElementById('loginEmail').value.trim();
+    
+    if (!email) {
+        alert('Введите Gmail');
+        return;
+    }
+    
+    // Проверяем, что это Gmail
+    if (!email.endsWith('@gmail.com')) {
+        alert('❌ Пожалуйста, используйте Gmail аккаунт (example@gmail.com)');
+        return;
+    }
+    
+    // Проверяем регистрацию
+    await checkUserRegistration(email);
+};
+
+// Кнопка "Добавить отзыв" в модальном окне авторизации
+document.getElementById('addReviewBtn').onclick = () => {
+    authModal.style.display = 'none';
+    farmModal.style.display = 'block';
+};
+
+// Кнопка "Добавить ферму"
 document.getElementById('addFarmBtn').onclick = () => {
     farmModal.style.display = 'block';
 };
@@ -194,30 +256,7 @@ window.onclick = (event) => {
     }
 };
 
-// Ввод кода
-document.getElementById('submitCodeBtn').onclick = async () => {
-    const code = document.getElementById('codeInput').value.trim();
-    if (!code) {
-        alert('Введите код');
-        return;
-    }
 
-    try {
-        const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=verifyCode&code=${code}`);
-        const result = await response.json();
-
-        if (result.valid) {
-            userCode = code;
-            alert('Код принят! Теперь вы можете просматривать информацию о фермах и добавлять отзывы.');
-            codeModal.style.display = 'none';
-        } else {
-            alert('Неверный код');
-        }
-    } catch (error) {
-        console.error('Ошибка проверки кода:', error);
-        alert('Ошибка проверки кода');
-    }
-};
 
 // Рейтинг звёзд (Material Design 3)
 const starBtns = document.querySelectorAll('.star-btn');
@@ -249,7 +288,7 @@ document.getElementById('farmForm').onsubmit = async (e) => {
         comment: document.getElementById('farmComment').value,
         earnings: document.getElementById('farmEarnings').value,
         duration: document.getElementById('farmDuration').value,
-        userCode: userCode
+        userGmail: document.getElementById('userGmail').value
     };
 
     if (!formData.rating) {
@@ -266,16 +305,13 @@ document.getElementById('farmForm').onsubmit = async (e) => {
         const result = await response.json();
 
         if (result.success) {
-            // Показать сгенерированный код
-            if (result.code && !userCode) {
-                userCode = result.code;
-                document.querySelector('.code-display').textContent = result.code;
-                document.getElementById('generatedCode').style.display = 'block';
-                document.getElementById('farmForm').style.display = 'none';
-            } else {
-                alert('Информация успешно добавлена!');
-                farmModal.style.display = 'none';
-            }
+            // Сохраняем Gmail пользователя для автоматического входа
+            userEmail = formData.userGmail;
+            localStorage.setItem('userEmail', userEmail);
+            updateUIForLoggedInUser();
+
+            alert('✅ Информация успешно добавлена!\n\nТеперь вы можете входить используя ваш Gmail: ' + userEmail);
+            farmModal.style.display = 'none';
 
             // Обновить карту
             loadFarms();
@@ -381,12 +417,6 @@ function showFarmInfo(farm) {
 
 // Функция жалобы на отзыв
 window.reportReview = async function (postcode, reviewIndex) {
-    // Проверяем авторизацию
-    if (!userCode) {
-        alert('Только авторизованные пользователи могут жаловаться на отзывы.\n\nДобавьте свой отзыв или введите код доступа.');
-        return;
-    }
-
     // Запрашиваем причину
     const reason = prompt('Почему этот отзыв недостоверный?\n\n(Например: "Я работал на этой ферме, информация не соответствует действительности")\n\nПричина (опционально):');
 
@@ -402,8 +432,7 @@ window.reportReview = async function (postcode, reviewIndex) {
                 action: 'reportReview',
                 postcode: postcode,
                 reviewIndex: reviewIndex,
-                reason: reason || 'Причина не указана',
-                reporterCode: userCode
+                reason: reason || 'Причина не указана'
             })
         });
 
@@ -424,21 +453,150 @@ window.reportReview = async function (postcode, reviewIndex) {
 
 // Инициализация автодополнения для названий ферм
 function initFarmNameAutocomplete() {
-    const datalist = document.getElementById('farmNamesList');
+    const input = document.getElementById('farmName');
+    const suggestionsDiv = document.getElementById('farmSuggestions');
     
-    // Очищаем список
-    datalist.innerHTML = '';
+    if (!input || !suggestionsDiv) {
+        console.error('Элементы автодополнения не найдены!');
+        return;
+    }
     
-    // Добавляем все известные фермы
-    KNOWN_FARMS.forEach(farmName => {
-        const option = document.createElement('option');
-        option.value = farmName;
-        datalist.appendChild(option);
+    console.log('Автодополнение инициализировано');
+    
+    // Убедимся, что поле доступно для ввода
+    input.removeAttribute('readonly');
+    input.removeAttribute('disabled');
+    
+    // При вводе текста
+    input.addEventListener('input', function(e) {
+        const value = this.value.toLowerCase().trim();
+        
+        console.log('Ввод:', value);
+        
+        // Очищаем список
+        suggestionsDiv.innerHTML = '';
+        
+        // Если пусто - скрываем
+        if (value.length < 1) {
+            suggestionsDiv.style.display = 'none';
+            return;
+        }
+        
+        // Фильтруем фермы
+        const matches = KNOWN_FARMS.filter(farm => 
+            farm.toLowerCase().includes(value)
+        ).slice(0, 10); // Максимум 10 подсказок
+        
+        console.log('Найдено совпадений:', matches.length);
+        
+        // Если нет совпадений - показываем сообщение
+        if (matches.length === 0) {
+            const div = document.createElement('div');
+            div.className = 'suggestion-item';
+            div.style.color = '#666';
+            div.style.fontStyle = 'italic';
+            div.textContent = 'Нет совпадений. Вы можете ввести новое название.';
+            suggestionsDiv.appendChild(div);
+            suggestionsDiv.style.display = 'block';
+            return;
+        }
+        
+        // Показываем подсказки
+        matches.forEach(farmName => {
+            const div = document.createElement('div');
+            div.className = 'suggestion-item';
+            div.textContent = farmName;
+            
+            // При клике на подсказку
+            div.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                input.value = farmName;
+                suggestionsDiv.style.display = 'none';
+                input.focus();
+            };
+            
+            suggestionsDiv.appendChild(div);
+        });
+        
+        suggestionsDiv.style.display = 'block';
     });
+    
+    // При фокусе показываем все варианты
+    input.addEventListener('focus', function() {
+        if (this.value.length > 0) {
+            // Триггерим событие input для показа подсказок
+            this.dispatchEvent(new Event('input'));
+        }
+    });
+    
+    // Скрыть при клике вне поля
+    document.addEventListener('click', (e) => {
+        if (!input.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+            suggestionsDiv.style.display = 'none';
+        }
+    });
+    
+    // Навигация клавиатурой
+    let selectedIndex = -1;
+    input.addEventListener('keydown', (e) => {
+        const items = suggestionsDiv.querySelectorAll('.suggestion-item');
+        
+        if (e.key === 'Escape') {
+            suggestionsDiv.style.display = 'none';
+            selectedIndex = -1;
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+            updateSelection(items, selectedIndex);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            selectedIndex = Math.max(selectedIndex - 1, 0);
+            updateSelection(items, selectedIndex);
+        } else if (e.key === 'Enter' && selectedIndex >= 0) {
+            e.preventDefault();
+            items[selectedIndex].click();
+            selectedIndex = -1;
+        }
+    });
+    
+    function updateSelection(items, index) {
+        items.forEach((item, i) => {
+            if (i === index) {
+                item.style.background = '#e3f2fd';
+            } else {
+                item.style.background = '';
+            }
+        });
+    }
+}
+
+// Проверка регистрации пользователя
+async function checkUserRegistration(email) {
+    try {
+        const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=checkUser&email=${encodeURIComponent(email)}`);
+        const result = await response.json();
+
+        if (result.registered) {
+            // Пользователь зарегистрирован
+            userEmail = email;
+            localStorage.setItem('userEmail', userEmail);
+            updateUIForLoggedInUser();
+            authModal.style.display = 'none';
+            alert('✅ Добро пожаловать, ' + email + '!');
+        } else {
+            // Пользователь не зарегистрирован
+            alert('❌ Этот Gmail не зарегистрирован.\n\nДобавьте отзыв о ферме, чтобы зарегистрироваться.');
+        }
+    } catch (error) {
+        console.error('Ошибка проверки пользователя:', error);
+        alert('❌ Ошибка проверки. Попробуйте позже.');
+    }
 }
 
 // Инициализация при загрузке
 window.onload = () => {
     initMap();
     initFarmNameAutocomplete();
+    checkAuth();
 };
