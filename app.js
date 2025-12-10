@@ -1,3 +1,157 @@
+// Telegram Web App Integration
+class TelegramWebApp {
+    constructor() {
+        this.tg = window.Telegram?.WebApp;
+        this.isInTelegram = !!this.tg;
+        this.user = null;
+        
+        if (this.isInTelegram) {
+            this.init();
+        }
+    }
+    
+    init() {
+        // Инициализация Telegram Web App
+        this.tg.ready();
+        this.tg.expand();
+        
+        // Получаем данные пользователя
+        this.user = this.tg.initDataUnsafe?.user;
+        
+        // Настраиваем тему
+        this.setupTheme();
+        
+        // Настраиваем главную кнопку
+        this.setupMainButton();
+        
+        // Настраиваем кнопку назад
+        this.setupBackButton();
+        
+        // Обработчики событий
+        this.setupEventHandlers();
+        
+        console.log('Telegram Web App initialized:', {
+            user: this.user,
+            platform: this.tg.platform,
+            version: this.tg.version
+        });
+    }
+    
+    setupTheme() {
+        if (!this.tg.themeParams) return;
+        
+        const theme = this.tg.themeParams;
+        const root = document.documentElement;
+        
+        // Применяем цвета темы Telegram
+        if (theme.bg_color) root.style.setProperty('--tg-bg-color', theme.bg_color);
+        if (theme.text_color) root.style.setProperty('--tg-text-color', theme.text_color);
+        if (theme.hint_color) root.style.setProperty('--tg-hint-color', theme.hint_color);
+        if (theme.link_color) root.style.setProperty('--tg-link-color', theme.link_color);
+        if (theme.button_color) root.style.setProperty('--tg-button-color', theme.button_color);
+        if (theme.button_text_color) root.style.setProperty('--tg-button-text-color', theme.button_text_color);
+        
+        // Добавляем класс для Telegram темы
+        document.body.classList.add('telegram-theme');
+    }
+    
+    setupMainButton() {
+        this.tg.MainButton.setText('Добавить ферму');
+        this.tg.MainButton.color = this.tg.themeParams.button_color || '#2e7d32';
+        this.tg.MainButton.textColor = this.tg.themeParams.button_text_color || '#ffffff';
+        
+        this.tg.MainButton.onClick(() => {
+            if (window.app) {
+                window.app.showAddFarmModal();
+            }
+        });
+    }
+    
+    setupBackButton() {
+        this.tg.BackButton.onClick(() => {
+            // Закрываем модальные окна или возвращаемся назад
+            if (window.app) {
+                window.app.hideAllModals();
+                window.app.hideFarmInfoPanel();
+            }
+            this.tg.BackButton.hide();
+        });
+    }
+    
+    setupEventHandlers() {
+        // Обработчик изменения viewport
+        this.tg.onEvent('viewportChanged', () => {
+            console.log('Viewport changed:', this.tg.viewportHeight, this.tg.viewportStableHeight);
+        });
+        
+        // Обработчик изменения темы
+        this.tg.onEvent('themeChanged', () => {
+            this.setupTheme();
+        });
+    }
+    
+    showMainButton(text = 'Добавить ферму') {
+        this.tg.MainButton.setText(text);
+        this.tg.MainButton.show();
+    }
+    
+    hideMainButton() {
+        this.tg.MainButton.hide();
+    }
+    
+    showBackButton() {
+        this.tg.BackButton.show();
+    }
+    
+    hideBackButton() {
+        this.tg.BackButton.hide();
+    }
+    
+    sendData(data) {
+        // Отправляем данные обратно в Telegram
+        this.tg.sendData(JSON.stringify(data));
+    }
+    
+    close() {
+        this.tg.close();
+    }
+    
+    showAlert(message) {
+        this.tg.showAlert(message);
+    }
+    
+    showConfirm(message, callback) {
+        this.tg.showConfirm(message, callback);
+    }
+    
+    hapticFeedback(type = 'impact', style = 'medium') {
+        if (this.tg.HapticFeedback) {
+            if (type === 'impact') {
+                this.tg.HapticFeedback.impactOccurred(style); // light, medium, heavy
+            } else if (type === 'notification') {
+                this.tg.HapticFeedback.notificationOccurred(style); // error, success, warning
+            } else if (type === 'selection') {
+                this.tg.HapticFeedback.selectionChanged();
+            }
+        }
+    }
+    
+    getUserData() {
+        return {
+            id: this.user?.id,
+            firstName: this.user?.first_name,
+            lastName: this.user?.last_name,
+            username: this.user?.username,
+            languageCode: this.user?.language_code,
+            isPremium: this.user?.is_premium
+        };
+    }
+    
+    isUserAuthorized() {
+        return !!this.user;
+    }
+}
+
 // UK Farms Map - Main Application
 class UKFarmsMap {
     constructor() {
@@ -11,12 +165,16 @@ class UKFarmsMap {
         this.filteredFarms = [];
         this.activeFilters = {};
         
+        // Инициализация Telegram Web App
+        this.telegramApp = new TelegramWebApp();
+        
         this.init();
     }
 
     async init() {
         try {
             this.initTheme();
+            this.initTelegramIntegration();
             this.checkSavedUser();
             this.updateHeaderForUser(); // Ensure login button is always set up
             this.initPWA();
@@ -26,11 +184,60 @@ class UKFarmsMap {
             this.initSearchAndFilters();
             this.initGeolocation();
             await this.loadFarms();
-            this.showNotification('Добро пожаловать в карту ферм Великобритании!', 'success');
+            
+            const welcomeMessage = this.telegramApp.isInTelegram 
+                ? `Добро пожаловать в Telegram Web App карты ферм UK! 🤖`
+                : 'Добро пожаловать в карту ферм Великобритании!';
+            this.showNotification(welcomeMessage, 'success');
         } catch (error) {
             console.error('Initialization error:', error);
             this.showNotification(CONFIG.ERROR_MESSAGES.SERVER_ERROR, 'error');
         }
+    }
+    
+    initTelegramIntegration() {
+        if (!this.telegramApp.isInTelegram) return;
+        
+        // Автоматическая авторизация через Telegram
+        if (this.telegramApp.isUserAuthorized()) {
+            const userData = this.telegramApp.getUserData();
+            this.currentUser = {
+                id: userData.id,
+                firstName: userData.firstName,
+                lastName: userData.lastName,
+                username: userData.username,
+                email: `${userData.username || userData.id}@telegram.user`, // Виртуальный email
+                source: 'telegram'
+            };
+            
+            // Сохраняем в localStorage
+            localStorage.setItem('telegramUser', JSON.stringify(this.currentUser));
+            localStorage.setItem('userEmail', this.currentUser.email);
+        }
+        
+        // Настраиваем интерфейс для Telegram
+        this.setupTelegramUI();
+    }
+    
+    setupTelegramUI() {
+        // Скрываем заголовок в Telegram (он есть в самом Telegram)
+        const header = document.querySelector('.app-header');
+        if (header) {
+            header.style.display = 'none';
+        }
+        
+        // Увеличиваем высоту карты
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            mainContent.style.height = '100vh';
+            mainContent.style.paddingBottom = '60px'; // Место для рекламы
+        }
+        
+        // Показываем главную кнопку Telegram
+        this.telegramApp.showMainButton('Добавить ферму');
+        
+        // Добавляем класс для стилизации
+        document.body.classList.add('telegram-web-app');
     }
 
     checkSavedUser() {
@@ -637,6 +844,11 @@ class UKFarmsMap {
         
         document.getElementById('farmInfoContent').innerHTML = content;
         this.farmInfoPanel.classList.remove('hidden');
+        
+        // Показываем кнопку "Назад" в Telegram
+        if (this.telegramApp.isInTelegram) {
+            this.telegramApp.showBackButton();
+        }
     }
 
     showAuthRequiredMessage(farm) {
@@ -673,6 +885,11 @@ class UKFarmsMap {
         
         document.getElementById('farmInfoContent').innerHTML = content;
         this.farmInfoPanel.classList.remove('hidden');
+        
+        // Показываем кнопку "Назад" в Telegram
+        if (this.telegramApp.isInTelegram) {
+            this.telegramApp.showBackButton();
+        }
     }
 
     renderAdBanner() {
@@ -766,6 +983,12 @@ class UKFarmsMap {
 
     hideFarmInfoPanel() {
         this.farmInfoPanel.classList.add('hidden');
+        
+        // Скрываем кнопку "Назад" и показываем главную кнопку в Telegram
+        if (this.telegramApp.isInTelegram) {
+            this.telegramApp.hideBackButton();
+            this.telegramApp.showMainButton('Добавить ферму');
+        }
     }
 
     showAddFarmModal() {
@@ -962,6 +1185,12 @@ class UKFarmsMap {
         modal.classList.add('show');
         modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
+        
+        // Показываем кнопку "Назад" в Telegram
+        if (this.telegramApp.isInTelegram) {
+            this.telegramApp.showBackButton();
+            this.telegramApp.hideMainButton();
+        }
     }
 
     hideModal(modalId) {
@@ -969,6 +1198,18 @@ class UKFarmsMap {
         modal.classList.remove('show');
         modal.style.display = 'none';
         document.body.style.overflow = '';
+        
+        // Скрываем кнопку "Назад" и показываем главную кнопку в Telegram
+        if (this.telegramApp.isInTelegram) {
+            this.telegramApp.hideBackButton();
+            this.telegramApp.showMainButton('Добавить ферму');
+        }
+    }
+    
+    hideAllModals() {
+        document.querySelectorAll('.modal.show').forEach(modal => {
+            this.hideModal(modal.id);
+        });
     }
 
     hideAllModals() {
@@ -1628,6 +1869,16 @@ class UKFarmsMap {
 
     // Enhanced notification with haptic feedback
     showNotification(message, type = 'info') {
+        // В Telegram Web App используем нативные уведомления
+        if (this.telegramApp.isInTelegram) {
+            if (type === 'error') {
+                this.telegramApp.showAlert(`❌ ${message}`);
+            } else {
+                // Для успеха и инфо показываем обычные уведомления, но с haptic feedback
+                this.telegramApp.hapticFeedback('notification', type === 'success' ? 'success' : 'warning');
+            }
+        }
+        
         const container = document.getElementById('notificationContainer');
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
@@ -2527,6 +2778,11 @@ class UKFarmsMap {
 let app;
 document.addEventListener('DOMContentLoaded', () => {
     app = new UKFarmsMap();
+    
+    // Глобальная переменная для Telegram Web App
+    if (window.Telegram?.WebApp) {
+        window.telegramApp = app.telegramApp;
+    }
 });
 
 // Make app globally available for onclick handlers
