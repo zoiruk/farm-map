@@ -1813,3 +1813,104 @@ body {
     margin-bottom: 12px !important;
   }
 }
+/* Telegram Web App Styles */
+.telegram-web-app {
+  /* Используем переменные цветов Telegram */
+  --md-sys-color-surface: var(--tg-bg-color, #ffffff);
+  --md-sys-color-on-surface: var(--tg-text-color, #000000);
+  --md-sys-color-on-surface-variant: var(--tg-hint-color, #999999);
+  --md-sys-color-primary: var(--tg-button-color, #2e7d32);
+  --md-sys-color-on-primary: var(--tg-button-text-color, #ffffff);
+}
+
+.telegram-web-app .app-header {
+  display: none !important;
+}
+
+.telegram-web-app .main-content {
+  height: 100vh !important;
+  padding-bottom: 60px !important;
+}
+
+.telegram-web-app .search-panel {
+  position: sticky;
+  top: 0;
+  z-index: 1001;
+}
+
+.telegram-web-app .farm-info-panel {
+  top: 10px;
+  right: 10px;
+  left: 10px;
+  width: auto;
+  max-height: calc(100vh - 80px);
+}
+
+.telegram-web-app .modal-content {
+  margin: 10px;
+  max-height: calc(100vh - 20px);
+}
+
+.telegram-web-app .notification-container {
+  top: 10px;
+  right: 10px;
+  left: 10px;
+  width: auto;
+}
+
+.telegram-web-app .notification {
+  min-width: auto;
+  width: 100%;
+}
+
+/* Telegram Theme Colors */
+.telegram-theme {
+  background-color: var(--tg-bg-color, #ffffff);
+  color: var(--tg-text-color, #000000);
+}
+
+.telegram-theme .btn-primary {
+  background-color: var(--tg-button-color, #2e7d32);
+  color: var(--tg-button-text-color, #ffffff);
+}
+
+.telegram-theme .btn-secondary {
+  color: var(--tg-button-color, #2e7d32);
+  border-color: var(--tg-button-color, #2e7d32);
+}
+
+.telegram-theme a {
+  color: var(--tg-link-color, #2e7d32);
+}
+
+/* Haptic Feedback Animation */
+.telegram-haptic {
+  animation: telegramPulse 0.1s ease;
+}
+
+@keyframes telegramPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+/* Mobile optimizations for Telegram */
+@media (max-width: 768px) {
+  .telegram-web-app .farm-info-panel {
+    top: 5px;
+    right: 5px;
+    left: 5px;
+    max-height: calc(100vh - 70px);
+  }
+  
+  .telegram-web-app .modal-content {
+    margin: 5px;
+    max-height: calc(100vh - 10px);
+  }
+  
+  .telegram-web-app .notification-container {
+    top: 5px;
+    right: 5px;
+    left: 5px;
+  }
+}
